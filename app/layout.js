@@ -1,4 +1,5 @@
 import { Atkinson_Hyperlegible, Fraunces } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 // Atkinson Hyperlegible was designed by the Braille Institute specifically to
@@ -37,7 +38,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${atkinson.variable} ${fraunces.variable}`}>
-      <body>{children}</body>
+      <body>{children}<Analytics /></body>
     </html>
   );
 }
