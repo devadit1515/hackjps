@@ -1,6 +1,6 @@
 # Aloud — a voice for anyone who can speak only with their eyes
 
-> Choose a few words with the smallest movement — a gaze, a dwell, or a blink — and Aloud turns them into a full, natural sentence and **says it out loud.** No typing. No spelling. No Morse code.
+> Watch a highlight move across a few calm choices, hold your eyes shut for a moment, and Aloud says what you need **out loud** — full sentence, real voice. No typing. No spelling. No Morse code.
 
 Built for **HackJPS 2026**.
 
@@ -8,43 +8,47 @@ Built for **HackJPS 2026**.
 
 ## The problem
 
-Millions of people — with ALS, cerebral palsy, locked-in syndrome, late-stage Parkinson's, or paralysis — cannot speak or use their hands, yet are fully present and have things to say. Existing tools are slow: many make you spell letter-by-letter, sometimes in Morse code, which is exhausting and has a steep learning curve.
+Millions of people — with ALS, cerebral palsy, locked-in syndrome, late-stage Parkinson's, or paralysis — cannot speak or use their hands, yet are fully present and have urgent things to say. Existing tools are slow and exhausting: many make you spell letter-by-letter, sometimes in Morse code, with a steep learning curve.
 
 ## What Aloud does
 
-Aloud needs only **one reliable signal**. You move through a small, calm board of choices and select with whatever you can do:
+Aloud asks for **one small, reliable movement: a deliberate blink.** A helper taps **Begin** once to turn on the camera — after that, the person controls everything with their eyes alone.
 
-- **Gaze / dwell** — rest on a choice and a line fills; it selects itself. Nothing to press.
-- **Blink** — turn on *Eyes* and a deliberate blink chooses the highlighted card (detected on-device with a webcam).
-- **Any switch** — Space, a click, or arrow keys work too.
+- **The highlight scans for you.** A border walks across the choices on its own. Nothing to aim, nothing to press.
+- **A long blink chooses.** When the highlight lands on what you want, hold your eyes shut for about a second. A quick, involuntary blink does nothing — so you never select by accident.
+- **It speaks, big and out loud.** Your message fills the screen in bold and repeats in a clear voice until you signal you're okay (another long blink, or *I got help*).
 
-You pick two or three words like *cold* and *a blanket*, and Aloud composes and speaks:
+Choices are grouped into four boards, ordered by urgency so the scan reaches the most time-critical things first:
 
-> *"I'm cold — could you bring me a blanket, please?"*
+| Board | For saying things like |
+| --- | --- |
+| **I feel** | *I'm in pain* · *I can't breathe* · *I'm too cold* |
+| **I need** | *I need some water* · *…the bathroom* · *…my medicine* |
+| **Please** | *Could you come here?* · *…call my family* · *…the nurse* |
+| **Yes / No** | *Yes* · *No* · *Please wait* · *Please stop* |
 
-A couple of eye-movements become a fluent, spoken sentence.
+Every tile is already a complete, natural sentence — there's nothing to spell or assemble.
 
 ## How it works
 
 | Layer | Technology |
 | --- | --- |
-| Hands-free input | **MediaPipe FaceLandmarker** (on-device ML) reads facial blendshapes to detect deliberate blinks, plus dwell-to-select and single-switch scanning |
-| Sentence composition | An **on-device grammar engine** turns selected words into a natural first-person sentence — instant, free, and fully private |
-| Speech | The browser's **Web Speech API** speaks the sentence aloud |
-| Optional "Smart AI" | A **Google Gemini** route can phrase sentences with an LLM — entirely optional and **off by default** |
+| Hands-free input | **MediaPipe FaceLandmarker** (on-device neural network) reads facial blendshapes every frame to detect a deliberate long blink |
+| Selection | **Single-switch auto-scanning** — an established AAC access method — with the scan frozen mid-blink so a selection lands on the option the highlight was resting on |
+| Speech | The browser's **Web Speech API** speaks each sentence aloud, looping until dismissed |
 
 ### AI / ML disclosure (HackJPS)
 
-- **Machine learning is core, on-device, and key-free:** MediaPipe FaceLandmarker (a neural network) powers the blink / eye control — the way a user without hand movement operates the entire app.
-- **Generative AI is optional:** the Google Gemini sentence-composer can be toggled on, but the app is fully functional with it off (the on-device composer is the default).
+- **Machine learning is the interface.** MediaPipe FaceLandmarker (a neural network) runs entirely on-device to power the blink control — it's the *only* way a user without hand movement operates the whole app. The ML isn't a feature bolted on; it *is* how Aloud is used.
+- **No cloud, no API keys, fully private.** Everything — vision and voice — runs in the browser. A person's medical needs never leave their machine, and the app works with no internet.
 - This README and the design were written by the author; AI coding tools assisted with implementation.
 
 ## Accessibility by design
 
-- **Atkinson Hyperlegible** — the typeface engineered by the Braille Institute for low-vision readers — is used for every control and word.
-- **Single-switch scanning** and **dwell** are established access methods for people with severe motor impairment; an anti-"Midas-touch" re-arm prevents accidental selections.
-- Few, large, high-contrast targets; respects `prefers-reduced-motion`.
-- Works **100% on-device** by default — a person's words never leave their machine.
+- **Atkinson Hyperlegible** — the typeface engineered by the Braille Institute for low-vision readers — is used throughout.
+- **Single-switch scanning + long blink** is a recognised access method for severe motor impairment; the scan freezes the instant the eyes close so selection is accurate.
+- **No scrolling, ever** — every screen fits the viewport, because the audience can't scroll.
+- Few, large, high-contrast targets; urgent messages (pain, breathing) get a distinct red treatment.
 
 ## Run locally
 
@@ -53,14 +57,8 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
-Optional — enable the "Smart AI" phrasing toggle with a free
-[Google AI Studio](https://aistudio.google.com/apikey) key:
-
-```bash
-# .env.local
-GEMINI_API_KEY=your_key_here
-```
+Allow camera access when prompted — it's the only input the app needs. (A keyboard works too for testing: arrow keys move the highlight, Space selects.)
 
 ## Tech
 
-Next.js 16 (App Router) · React 19 · MediaPipe Tasks Vision · Web Speech API · Lucide · optional Google Gemini (`@google/genai`).
+Next.js 16 (App Router) · React 19 · MediaPipe Tasks Vision · Web Speech API · Lucide · Atkinson Hyperlegible + Fraunces.

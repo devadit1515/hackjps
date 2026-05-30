@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { icons } from "lucide-react";
-import { CATEGORIES, WORDS, QUICK } from "@/lib/board";
-import { composeLocal } from "@/lib/compose-local";
+import { CATEGORIES, WORDS } from "@/lib/board";
 
 const BlinkCam = dynamic(() => import("@/components/BlinkCam"), { ssr: false });
 
@@ -14,7 +13,7 @@ function LIcon({ name, size = 30, stroke = 1.5 }) {
 }
 
 // How long the highlight rests on each choice before walking to the next one.
-const SCAN_MS = 1700;
+const SCAN_MS = 1450;
 
 export default function Aloud() {
   const [started, setStarted] = useState(false);
@@ -89,13 +88,8 @@ export default function Aloud() {
     const primary = [], secondary = [];
     if (view === "home") {
       for (const c of CATEGORIES) primary.push({ key: "cat-" + c.id, type: "cat", ...c });
-      secondary.push({ key: "open-quick", type: "open-quick", label: "Quick", icon: "Zap", ghost: true });
-      secondary.push({ key: "sos", type: "say", label: "SOS", icon: "Siren", say: "I need help, please.", urgent: true });
-    } else if (view === "quick") {
-      for (const q of QUICK) primary.push({ key: "q-" + q.label, type: "say", ...q });
-      secondary.push({ key: "back", type: "back", label: "Back", icon: "ChevronLeft", ghost: true });
     } else {
-      for (const w of WORDS[view] || []) primary.push({ key: "w-" + w.label, type: "word", ...w });
+      for (const w of WORDS[view] || []) primary.push({ key: "w-" + view + "-" + w.label, type: "say", ...w });
       secondary.push({ key: "back", type: "back", label: "Back", icon: "ChevronLeft", ghost: true });
     }
     return { primary, secondary, targets: [...primary, ...secondary] };
@@ -127,8 +121,6 @@ export default function Aloud() {
     setDwellLocked(true);
     switch (item.type) {
       case "cat": setView(item.id); break;
-      case "open-quick": setView("quick"); break;
-      case "word": startAnnounce(composeLocal([item.label]), false); break;
       case "say": startAnnounce(item.say || item.label, item.urgent); break;
       case "back": setView("home"); break;
       default: break;
@@ -210,7 +202,7 @@ export default function Aloud() {
     const isDwell = isFocus && hovering && !dwellLocked;
     const cls = [
       "choice",
-      item.type === "word" || item.type === "say" ? "is-word" : "",
+      item.type === "say" ? "is-word" : "",
       item.ghost ? "ghost" : "",
       item.urgent ? "urgent" : "",
       isFocus ? "focus" : "",
@@ -233,7 +225,7 @@ export default function Aloud() {
     );
   };
 
-  const crumb = view === "home" ? "What would you like to say?" : view === "quick" ? "Quick replies" : (CATEGORIES.find((c) => c.id === view)?.label || "");
+  const crumb = view === "home" ? "What would you like to say?" : (CATEGORIES.find((c) => c.id === view)?.label || "");
 
   return (
     <div className="app-light">
@@ -291,10 +283,10 @@ function Announce({ data, speaking, onDone }) {
         onMouseLeave={() => setDwell(false)}
         onClick={onDone}
       >
-        <LIcon name="Check" size={22} stroke={2.2} /> Done — I&apos;m okay now
+        <LIcon name="Check" size={22} stroke={2.2} /> I got help
         {dwell && <span className="dwell-bar" onAnimationEnd={onDone} />}
       </button>
-      <span className="a-hint">When you&apos;re okay again, just hold your eyes shut for a moment — or look at <b>Done</b> and long-blink.</span>
+      <span className="a-hint">When you&apos;re okay again, just hold your eyes shut for a moment — or look at <b>I got help</b> and long-blink.</span>
     </div>
   );
 }
