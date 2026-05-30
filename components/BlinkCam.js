@@ -2,42 +2,38 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Deliberate-blink detection via MediaPipe FaceLandmarker blendshapes.
-// All on-device — the video never leaves the browser.
+// On-device eye control via MediaPipe FaceLandmarker blendshapes.
+// Emits gaze DIRECTION (look left/right/up/down to move) and deliberate BLINK
+// (to select). All processing stays in the browser — video never leaves.
 const WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm";
 const MODEL =
   "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
 
-const CLOSE = 0.55; // blendshape score: eyes considered closed above this
-const OPEN = 0.35; // ...and open again below this (hysteresis)
-const MIN_CLOSED = 220; // ms — longer than a natural blink (deliberate)
-const MAX_CLOSED = 1400; // ms — ignore "resting eyes closed"
-const COOLDOWN = 650; // ms between accepted blinks
+// blink
+const CLOSE = 0.55, OPEN = 0.35, BLINK_COOLDOWN = 550;
+const SHORT_MIN = 150, SHORT_MAX = 600;   // quick blink → select
+const LONG_MIN = 850, LONG_MAX = 2800;    // long blink → done / dismiss
+// gaze
+const GAZE_FIRE = 0.5, GAZE_RECENTER = 0.3, GAZE_COOLDOWN = 420;
 
-export default function BlinkCam({ onBlink, onError }) {
+export default function BlinkCam({ onBlink, onLongBlink, onGaze, onError }) {
   const videoRef = useRef(null);
   const [armed, setArmed] = useState(false);
   const [meter, setMeter] = useState(0);
   const [blinking, setBlinking] = useState(false);
+  const [dir, setDir] = useState(null);
 
-  const cbRef = useRef({ onBlink, onError });
-  cbRef.current = { onBlink, onError };
+  const cb = useRef({ onBlink, onLongBlink, onGaze, onError });
+  cb.current = { onBlink, onLongBlink, onGaze, onError };
 
   useEffect(() => {
-    let landmarker = null;
-    let stream = null;
-    let raf = 0;
-    let cancelled = false;
-
-    let closed = false;
-    let closedStart = 0;
-    let lastBlink = 0;
-    let lastVideoTime = -1;
+    let landmarker = null, stream = null, raf = 0, cancelled = false;
+    let closed = false, closedStart = 0, lastBlink = 0, lastVideoTime = -1;
+    let gazeArmed = true, lastGaze = 0;
 
     async function init() {
       try {
-        const vision = await import("@mediapipe/tasks-vision");
-        const { FilesetResolver, FaceLandmarker } = vision;
+        const { FilesetResolver, FaceLandmarker } = await import("@mediapipe/tasks-vision");
         const fileset = await FilesetResolver.forVisionTasks(WASM);
         landmarker = await FaceLandmarker.createFromOptions(fileset, {
           baseOptions: { modelAssetPath: MODEL, delegate: "GPU" },
@@ -45,10 +41,8 @@ export default function BlinkCam({ onBlink, onError }) {
           runningMode: "VIDEO",
           numFaces: 1,
         });
-
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user", width: 480, height: 360 },
-          audio: false,
+          video: { facingMode: "user", width: 480, height: 360 }, audio: false,
         });
         if (cancelled) return;
         const video = videoRef.current;
@@ -58,9 +52,7 @@ export default function BlinkCam({ onBlink, onError }) {
         loop();
       } catch (e) {
         console.error("[BlinkCam]", e);
-        cbRef.current.onError?.(
-          "Couldn't start blink detection. Use Space or click instead."
-        );
+        cb.current.onError?.("Couldn't start the camera. You can still use a keyboard or click.");
       }
     }
 
@@ -72,23 +64,38 @@ export default function BlinkCam({ onBlink, onError }) {
         const res = landmarker.detectForVideo(video, performance.now());
         const cats = res?.faceBlendshapes?.[0]?.categories;
         if (cats) {
-          const l = cats.find((c) => c.categoryName === "eyeBlinkLeft")?.score ?? 0;
-          const r = cats.find((c) => c.categoryName === "eyeBlinkRight")?.score ?? 0;
-          const score = (l + r) / 2;
-          setMeter(score);
+          const g = (n) => cats.find((c) => c.categoryName === n)?.score ?? 0;
           const now = performance.now();
 
-          if (!closed && score > CLOSE) {
-            closed = true;
-            closedStart = now;
-            setBlinking(true);
-          } else if (closed && score < OPEN) {
-            closed = false;
-            setBlinking(false);
-            const dur = now - closedStart;
-            if (dur >= MIN_CLOSED && dur <= MAX_CLOSED && now - lastBlink > COOLDOWN) {
-              lastBlink = now;
-              cbRef.current.onBlink?.();
+          // ---- blink (select) ----
+          const blink = (g("eyeBlinkLeft") + g("eyeBlinkRight")) / 2;
+          setMeter(blink);
+          if (!closed && blink > CLOSE) { closed = true; closedStart = now; setBlinking(true); }
+          else if (closed && blink < OPEN) {
+            closed = false; setBlinking(false);
+            const d = now - closedStart;
+            if (now - lastBlink > BLINK_COOLDOWN) {
+              if (d >= SHORT_MIN && d <= SHORT_MAX) { lastBlink = now; cb.current.onBlink?.(); }
+              else if (d >= LONG_MIN && d <= LONG_MAX) { lastBlink = now; cb.current.onLongBlink?.(); }
+            }
+          }
+
+          // ---- gaze direction (move) — ignore while eyes are closing ----
+          if (!closed && blink < OPEN) {
+            const left = (g("eyeLookOutLeft") + g("eyeLookInRight")) / 2;   // looking user's left
+            const right = (g("eyeLookInLeft") + g("eyeLookOutRight")) / 2;  // user's right
+            const up = (g("eyeLookUpLeft") + g("eyeLookUpRight")) / 2;
+            const down = (g("eyeLookDownLeft") + g("eyeLookDownRight")) / 2;
+            const scores = { left, right, up, down };
+            let best = "left";
+            for (const k of ["right", "up", "down"]) if (scores[k] > scores[best]) best = k;
+            const val = scores[best];
+            if (gazeArmed && val > GAZE_FIRE && now - lastGaze > GAZE_COOLDOWN) {
+              gazeArmed = false; lastGaze = now; setDir(best);
+              cb.current.onGaze?.(best);
+              setTimeout(() => setDir(null), 360);
+            } else if (!gazeArmed && val < GAZE_RECENTER) {
+              gazeArmed = true;
             }
           }
         }
@@ -97,7 +104,6 @@ export default function BlinkCam({ onBlink, onError }) {
     }
 
     init();
-
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
@@ -106,13 +112,16 @@ export default function BlinkCam({ onBlink, onError }) {
     };
   }, []);
 
+  const arrow = { left: "←", right: "→", up: "↑", down: "↓" }[dir];
+
   return (
     <div className={`cam-bubble ${armed ? "armed" : ""} ${blinking ? "blinking" : ""}`}>
       <div className="eyemeter"><i style={{ width: `${Math.round(meter * 100)}%` }} /></div>
       <video ref={videoRef} muted playsInline />
+      {arrow && <div className="gaze-arrow">{arrow}</div>}
       <div className="cam-state">
         <span className="ring" />
-        {armed ? (blinking ? "Blink…" : "Watching your eyes") : "Starting camera…"}
+        {armed ? (blinking ? "Blink — select" : "Tracking your eyes") : "Starting camera…"}
       </div>
     </div>
   );

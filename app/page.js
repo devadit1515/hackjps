@@ -13,8 +13,6 @@ function LIcon({ name, size = 30, stroke = 1.5 }) {
   return <Cmp size={size} strokeWidth={stroke} aria-hidden />;
 }
 
-const SCAN_MS = 1700;
-
 export default function Aloud() {
   const [started, setStarted] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -22,17 +20,15 @@ export default function Aloud() {
   const [toast, setToast] = useState("");
 
   const [view, setView] = useState("home"); // home | feel | need | do | social | quick
-  const [strip, setStrip] = useState([]);
-  const [sentence, setSentence] = useState("");
+  const [announce, setAnnounce] = useState(null); // { text, urgent } | null
   const [speaking, setSpeaking] = useState(false);
-  const [composing, setComposing] = useState(false);
-  const [history, setHistory] = useState([]);
 
   const [focusIdx, setFocusIdx] = useState(null);
   const [hovering, setHovering] = useState(false);
-  const [dwellLocked, setDwellLocked] = useState(false); // re-arm after a selection (anti "Midas touch")
+  const [dwellLocked, setDwellLocked] = useState(false);
 
   const voiceRef = useRef(null);
+  const announcingRef = useRef(false);
 
   /* ---------- speech ---------- */
   useEffect(() => {
@@ -50,22 +46,43 @@ export default function Aloud() {
     window.speechSynthesis.onvoiceschanged = pick;
   }, []);
 
-  const speak = useCallback((text) => {
-    if (typeof window === "undefined" || !window.speechSynthesis || !text) return;
+  const speakOnce = useCallback((text, onend) => {
+    if (typeof window === "undefined" || !window.speechSynthesis || !text) { onend && onend(); return; }
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "en-US"; u.rate = 1; u.pitch = 1;
     if (voiceRef.current) u.voice = voiceRef.current;
     u.onstart = () => setSpeaking(true);
-    u.onend = () => setSpeaking(false);
-    u.onerror = () => setSpeaking(false);
+    u.onend = () => { setSpeaking(false); onend && onend(); };
+    u.onerror = () => { setSpeaking(false); onend && onend(); };
     window.speechSynthesis.speak(u);
+  }, []);
+
+  /* ---------- announce (full-screen, looping until Done) ---------- */
+  const startAnnounce = useCallback((text, urgent) => {
+    if (!text) return;
+    setAnnounce({ text, urgent: !!urgent });
+    setFocusIdx(0);
+    announcingRef.current = true;
+    const loop = () => {
+      if (!announcingRef.current) return;
+      speakOnce(text, () => { if (announcingRef.current) setTimeout(loop, 550); });
+    };
+    loop();
+  }, [speakOnce]);
+
+  const stopAnnounce = useCallback(() => {
+    announcingRef.current = false;
+    try { window.speechSynthesis.cancel(); } catch {}
+    setSpeaking(false);
+    setAnnounce(null);
+    setView("home");
+    setFocusIdx(null);
   }, []);
 
   /* ---------- targets ---------- */
   const { primary, secondary, targets } = useMemo(() => {
-    const primary = [];
-    const secondary = [];
+    const primary = [], secondary = [];
     if (view === "home") {
       for (const c of CATEGORIES) primary.push({ key: "cat-" + c.id, type: "cat", ...c });
       secondary.push({ key: "open-quick", type: "open-quick", label: "Quick", icon: "Zap", ghost: true });
@@ -77,79 +94,73 @@ export default function Aloud() {
       for (const w of WORDS[view] || []) primary.push({ key: "w-" + w.label, type: "word", ...w });
       secondary.push({ key: "back", type: "back", label: "Back", icon: "ChevronLeft", ghost: true });
     }
-    if (strip.length) {
-      secondary.unshift({ key: "speak", type: "speak", label: "Speak", icon: "Volume2", accent: true });
-      secondary.push({ key: "clear", type: "clear", label: "Start over", icon: "RotateCcw", ghost: true });
-    }
     return { primary, secondary, targets: [...primary, ...secondary] };
-  }, [view, strip.length]);
+  }, [view]);
 
-  const cols = primary.length === 4 ? 4 : primary.length === 6 ? 3 : primary.length <= 2 ? 2 : 3;
-
-  useEffect(() => { setFocusIdx(null); }, [view, strip.length]);
-
-  /* ---------- compose + speak ---------- */
-  const finishSpeak = useCallback((line) => {
-    setSentence(line); setHistory((h) => [...h, line]); speak(line); setStrip([]); setView("home");
-  }, [speak]);
-
-  const doSpeak = useCallback(async () => {
-    if (!strip.length || composing) return;
-    setComposing(true);
-    // a beat of "composing" so the sentence feels considered, then on-device compose
-    const line = composeLocal(strip);
-    setSentence("");
-    await new Promise((r) => setTimeout(r, 480));
-    setComposing(false);
-    finishSpeak(line);
-  }, [strip, composing, finishSpeak]);
+  const cols = primary.length === 4 ? 2 : primary.length === 6 ? 3 : primary.length <= 2 ? 2 : 3;
+  useEffect(() => { setFocusIdx(null); }, [view]);
 
   /* ---------- selection ---------- */
   const select = useCallback((item) => {
     if (!item) return;
     setFocusIdx(null);
-    setDwellLocked(true); // must look away once before another dwell can fire
+    setDwellLocked(true);
     switch (item.type) {
       case "cat": setView(item.id); break;
-      case "word": setStrip((s) => [...s, item.label]); setView("home"); break;
       case "open-quick": setView("quick"); break;
-      case "say": setSentence(item.say || item.label); setHistory((h) => [...h, item.say || item.label]); speak(item.say || item.label); if (view === "quick") setView("home"); break;
-      case "speak": doSpeak(); break;
-      case "clear": setStrip([]); setSentence(""); break;
+      case "word": startAnnounce(composeLocal([item.label]), false); break;
+      case "say": startAnnounce(item.say || item.label, item.urgent); break;
       case "back": setView("home"); break;
       default: break;
     }
-  }, [doSpeak, speak, view]);
+  }, [startAnnounce]);
 
   const selectFocused = useCallback(() => {
     if (focusIdx != null && targets[focusIdx]) select(targets[focusIdx]);
   }, [focusIdx, targets, select]);
 
-  /* ---------- keyboard (arrows move, space/enter select) ---------- */
+  const moveFocus = useCallback((dir) => {
+    setHovering(false);
+    const n = targets.length;
+    if (!n) return;
+    setFocusIdx((i) => {
+      if (i == null) return 0;
+      if (dir === "left") return (i - 1 + n) % n;
+      if (dir === "right") return (i + 1) % n;
+      if (dir === "up") return Math.max(0, i - cols);
+      if (dir === "down") return Math.min(n - 1, i + cols);
+      return i;
+    });
+  }, [targets.length, cols]);
+
+  /* ---------- keyboard ---------- */
   useEffect(() => {
     if (!started) return;
     function onKey(e) {
       if (showHelp) return;
-      const n = targets.length;
-      if (e.code === "ArrowRight" || e.code === "ArrowDown") { e.preventDefault(); setHovering(false); setFocusIdx((i) => (i == null ? 0 : (i + 1) % n)); }
-      else if (e.code === "ArrowLeft" || e.code === "ArrowUp") { e.preventDefault(); setHovering(false); setFocusIdx((i) => (i == null ? n - 1 : (i - 1 + n) % n)); }
+      if (announce) {
+        if (["Space", "Enter", "Escape"].includes(e.code)) { e.preventDefault(); stopAnnounce(); }
+        return;
+      }
+      if (e.code === "ArrowRight") { e.preventDefault(); moveFocus("right"); }
+      else if (e.code === "ArrowLeft") { e.preventDefault(); moveFocus("left"); }
+      else if (e.code === "ArrowDown") { e.preventDefault(); moveFocus("down"); }
+      else if (e.code === "ArrowUp") { e.preventDefault(); moveFocus("up"); }
       else if (e.code === "Space" || e.code === "Enter") { e.preventDefault(); selectFocused(); }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [started, showHelp, targets.length, selectFocused]);
+  }, [started, showHelp, announce, moveFocus, selectFocused, stopAnnounce]);
 
-  /* ---------- gentle scan for eyes-only users ---------- */
-  useEffect(() => {
-    if (!started || !camOn || hovering || showHelp || composing) return;
-    if (!targets.length) return;
-    const id = setInterval(() => setFocusIdx((i) => (i == null ? 0 : (i + 1) % targets.length)), SCAN_MS);
-    return () => clearInterval(id);
-  }, [started, camOn, hovering, showHelp, composing, targets.length]);
+  useEffect(() => { if (camOn) setFocusIdx((i) => (i == null ? 0 : i)); }, [camOn, view, announce]);
 
-  /* ---------- blink select (latest) ---------- */
+  /* ---------- eye refs (latest) ---------- */
   const blinkRef = useRef(() => {});
-  useEffect(() => { blinkRef.current = () => { if (started && !showHelp) selectFocused(); }; });
+  const longBlinkRef = useRef(() => {});
+  const gazeRef = useRef(() => {});
+  useEffect(() => { blinkRef.current = () => { if (!started || showHelp || announce) return; selectFocused(); }; });
+  useEffect(() => { longBlinkRef.current = () => { if (announce) stopAnnounce(); }; });
+  useEffect(() => { gazeRef.current = (d) => { if (started && !showHelp && !announce) moveFocus(d); }; });
 
   function flashToast(m) { setToast(m); setTimeout(() => setToast(""), 4000); }
 
@@ -159,6 +170,7 @@ export default function Aloud() {
       <Intro
         onBegin={() => {
           setStarted(true);
+          setCamOn(true); // eye control is the only mode — request the camera immediately
           if (typeof window !== "undefined" && window.speechSynthesis) {
             try { window.speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch {}
           }
@@ -175,7 +187,6 @@ export default function Aloud() {
       "choice",
       item.type === "word" || item.type === "say" ? "is-word" : "",
       item.ghost ? "ghost" : "",
-      item.accent ? "accent" : "",
       item.urgent ? "urgent" : "",
       isFocus ? "focus" : "",
       isDwell ? "dwell" : "",
@@ -190,7 +201,7 @@ export default function Aloud() {
         onClick={() => select(item)}
         aria-label={item.label}
       >
-        <span className="c-ico"><LIcon name={item.icon} size={item.accent || (!item.ghost && (item.type === "cat")) ? 30 : 26} /></span>
+        <span className="c-ico"><LIcon name={item.icon} size={item.type === "cat" ? 30 : 26} /></span>
         <span className="c-label">{item.label}</span>
         <span className="dwell-bar" onAnimationEnd={() => { if (isDwell) select(item); }} />
       </button>
@@ -204,9 +215,9 @@ export default function Aloud() {
       <header className="top">
         <div className="mark"><span className="dot" />Aloud</div>
         <div className="top-actions">
-          <button className="ghost-btn" data-on={camOn} onClick={() => setCamOn((v) => !v)}>
-            <LIcon name={camOn ? "Eye" : "EyeOff"} size={16} stroke={2} /> {camOn ? "Eyes on" : "Eyes"}
-          </button>
+          <span className="eye-status" data-on={camOn}>
+            <LIcon name="Eye" size={15} stroke={2} /> {camOn ? "Eye control on" : "Camera off"}
+          </span>
           <button className="ghost-btn" onClick={() => setShowHelp(true)}>
             <LIcon name="HelpCircle" size={16} stroke={2} /> Help
           </button>
@@ -214,32 +225,29 @@ export default function Aloud() {
       </header>
 
       <main className="canvas">
-        <div className={`voice ${speaking ? "speaking" : ""}`}>
-          <span className="eyebrow">{speaking ? "Speaking" : composing ? "Finding the words" : "Your voice"}</span>
-          <p className={`voice-line ${sentence ? "" : "ph"}`}>
-            {composing ? "…" : sentence || "Look at a word to begin."}
-          </p>
-          {strip.length > 0 && (
-            <div className="trail">{strip.map((w, i) => <span className="tw" key={i}>{w}</span>)}</div>
-          )}
-        </div>
-
         <span className="crumb">{crumb}</span>
-
         <div className="choices" data-cols={cols}>
           {primary.map((it) => renderChoice(it))}
         </div>
-
         {secondary.length > 0 && (
           <div className="sub-actions">{secondary.map((it) => renderChoice(it, "sub"))}</div>
         )}
       </main>
 
       <footer className="hint">
-        {camOn ? <><span className="live" /> Look &amp; blink to choose</> : <>Hover to dwell, or press <kbd>←</kbd> <kbd>→</kbd> then <kbd>Space</kbd></>}
+        {camOn ? <><span className="live" /> Look to move · blink to choose</> : <>Hover to dwell, or use <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> then <kbd>Space</kbd></>}
       </footer>
 
-      {camOn && <BlinkCam onBlink={() => blinkRef.current()} onError={(m) => { flashToast(m); setCamOn(false); }} />}
+      {camOn && (
+        <BlinkCam
+          onBlink={() => blinkRef.current()}
+          onLongBlink={() => longBlinkRef.current()}
+          onGaze={(d) => gazeRef.current(d)}
+          onError={(m) => { flashToast(m); setCamOn(false); }}
+        />
+      )}
+
+      {announce && <Announce data={announce} speaking={speaking} onDone={stopAnnounce} />}
       {toast && <div className="toast">{toast}</div>}
       {showHelp && <HelpSheet onClose={() => setShowHelp(false)} />}
     </div>
@@ -247,6 +255,26 @@ export default function Aloud() {
 }
 
 /* ============================================================ */
+function Announce({ data, speaking, onDone }) {
+  const [dwell, setDwell] = useState(false);
+  return (
+    <div className={`announce ${data.urgent ? "urgent" : ""}`}>
+      <div className={`a-pulse ${speaking ? "on" : ""}`} aria-hidden><span /><span /><span /><span /><span /></div>
+      <p className="a-text">{data.text}</p>
+      <button
+        className="a-done"
+        onMouseEnter={() => setDwell(true)}
+        onMouseLeave={() => setDwell(false)}
+        onClick={onDone}
+      >
+        <LIcon name="Check" size={22} stroke={2.2} /> Done — I&apos;m okay now
+        {dwell && <span className="dwell-bar" onAnimationEnd={onDone} />}
+      </button>
+      <span className="a-hint">When you&apos;re okay again, look at <b>Done</b> and blink — or just hold your eyes shut for a moment.</span>
+    </div>
+  );
+}
+
 function Intro({ onBegin }) {
   const [dwell, setDwell] = useState(false);
   return (
@@ -260,10 +288,10 @@ function Intro({ onBegin }) {
           onMouseLeave={() => setDwell(false)}
           onClick={onBegin}
         >
-          Begin
+          Begin with eye control
           {dwell && <span className="dwell-bar" onAnimationEnd={onBegin} />}
         </button>
-        <span className="i-hint">Look here, or press any key</span>
+        <span className="i-hint">A helper taps once to turn on the camera. After that you control everything with your eyes — <b>look</b> to move, <b>blink</b> to choose, <b>long blink</b> for done.</span>
       </div>
       <KeyStart onBegin={onBegin} />
     </div>
@@ -284,11 +312,11 @@ function HelpSheet({ onClose }) {
     <div className="overlay" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <h2>Speaking with your eyes</h2>
-        <p>Aloud needs only one small, reliable movement. Choose a few words and they become a full spoken sentence — no typing, no spelling.</p>
+        <p>Choose a word and Aloud says it aloud — then shows it big and repeats it until you signal you&apos;re okay. No typing, no hands.</p>
         <div className="steps">
-          <div className="st"><span className="si"><LIcon name="Eye" size={20} /></span><span><div className="stt">Look or hover</div><div className="std">Rest on a choice — a line fills and it selects itself. No clicking.</div></span></div>
-          <div className="st"><span className="si"><LIcon name="Sparkle" size={20} /></span><span><div className="stt">Or blink</div><div className="std">Turn on “Eyes”, and a deliberate blink chooses the highlighted card.</div></span></div>
-          <div className="st"><span className="si"><LIcon name="Volume2" size={20} /></span><span><div className="stt">It speaks for you</div><div className="std">Your words become a natural sentence, said out loud — fully on your device.</div></span></div>
+          <div className="st"><span className="si"><LIcon name="Eye" size={20} /></span><span><div className="stt">Look to move</div><div className="std">Your gaze moves the highlight between choices.</div></span></div>
+          <div className="st"><span className="si"><LIcon name="Sparkle" size={20} /></span><span><div className="stt">Blink to choose</div><div className="std">A quick blink selects the highlighted card and announces it.</div></span></div>
+          <div className="st"><span className="si"><LIcon name="Check" size={20} /></span><span><div className="stt">Long blink for Done</div><div className="std">Hold your eyes shut for about a second to dismiss the message.</div></span></div>
         </div>
         <button className="close" onClick={onClose}>Got it</button>
       </div>
