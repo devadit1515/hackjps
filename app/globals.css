@@ -226,6 +226,30 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .sheet .st .stt { font-weight: 700; }
 .sheet .st .std { color: var(--ink-soft); font-size: 15px; }
 .sheet .close { font-family: var(--main); font-weight: 700; color: var(--paper-lift); background: var(--ink); padding: 14px 26px; border-radius: 999px; }
+.sheet-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.recal { font-family: var(--main); font-weight: 700; font-size: 14px; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 8px; padding: 13px 20px; border-radius: 999px; border: 1px solid var(--line-2); transition: color .2s, border-color .2s; }
+.recal:hover { color: var(--clay); border-color: rgba(187,87,51,.4); }
+
+/* ============================================================
+   Calibration overlay — tune blinking to this user, once
+   ============================================================ */
+.calib { position: fixed; inset: 0; z-index: 95; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; background: rgba(243,239,231,0.93); backdrop-filter: blur(12px); animation: announceIn 0.4s var(--ease); }
+.calib-card { display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 32ch; }
+.calib-card h2 { font-family: var(--display); font-weight: 400; font-size: clamp(28px, 5vw, 46px); color: var(--ink); line-height: 1.05; }
+.calib-card p { color: var(--ink-soft); line-height: 1.5; font-size: 16px; }
+.calib-ico { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; color: var(--clay); background: var(--clay-wash); box-shadow: inset 0 0 0 1px rgba(187,87,51,.18); }
+.calib-ico.done { color: #2c7a4b; background: rgba(127,201,154,0.2); box-shadow: inset 0 0 0 1px rgba(44,122,75,.28); }
+.calib-eye { color: var(--clay); }
+.calib-eye.closed { color: var(--clay-deep); }
+.calib-bar { width: min(340px, 72vw); height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; margin-top: 6px; }
+.calib-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--clay), #e08a5c); animation: calibfill linear forwards; }
+@keyframes calibfill { from { width: 0; } to { width: 100%; } }
+.calib-actions { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+.calib-go { font-family: var(--main); font-weight: 700; font-size: 16px; color: var(--paper-lift); background: var(--clay); padding: 15px 38px; border-radius: 999px; box-shadow: 0 16px 34px -18px rgba(187,87,51,0.8); transition: transform .2s; }
+.calib-go:hover { transform: translateY(-2px); }
+.calib-skip { font-family: var(--main); font-weight: 700; font-size: 14px; color: var(--ink-soft); padding: 14px 22px; border-radius: 999px; border: 1px solid var(--line-2); }
+.calib-skip:hover { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .calib-bar i { animation-duration: 0.02s; } }
 
 .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 60; font-family: var(--main); font-weight: 700; font-size: 14px; color: var(--paper-lift); background: var(--ink); padding: 13px 22px; border-radius: 999px; box-shadow: 0 18px 40px -20px rgba(0,0,0,0.5); }
 

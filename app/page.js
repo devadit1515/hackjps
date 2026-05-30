@@ -29,6 +29,8 @@ export default function Aloud() {
   const [dwellLocked, setDwellLocked] = useState(false);
   const [eyesClosed, setEyesClosed] = useState(false); // freeze the scan while a blink is in progress
   const [recents, setRecents] = useState([]);          // last spoken messages, re-sayable from the speller
+  const [calibrating, setCalibrating] = useState(false); // blink-calibration overlay is up
+  const [recalNonce, setRecalNonce] = useState(0);       // bump to re-run calibration
 
   const speech = useSpeech();
   const spellRef = useRef(null);
@@ -63,14 +65,14 @@ export default function Aloud() {
 
   /* ---------- auto-scan for the boards (not the speller, which scans itself) ---------- */
   useEffect(() => {
-    if (!started || view === "spell" || speech.announce || showHelp || hovering || eyesClosed) return;
+    if (!started || view === "spell" || speech.announce || showHelp || hovering || eyesClosed || calibrating) return;
     const n = targets.length;
     if (!n) return;
     const id = setInterval(() => {
       setFocusIdx((i) => (i == null ? 0 : (i + 1) % n));
     }, SCAN_MS);
     return () => clearInterval(id);
-  }, [started, view, speech.announce, showHelp, hovering, eyesClosed, targets.length]);
+  }, [started, view, speech.announce, showHelp, hovering, eyesClosed, calibrating, targets.length]);
 
   /* ---------- board selection ---------- */
   const select = useCallback((item) => {
@@ -189,7 +191,7 @@ export default function Aloud() {
       {view === "spell" ? (
         <Speller
           ref={spellRef}
-          active={started && !speech.announce && !showHelp}
+          active={started && !speech.announce && !showHelp && !calibrating}
           eyesClosed={eyesClosed}
           startAnnounce={speech.startAnnounce}
           say={speech.say}
@@ -231,13 +233,16 @@ export default function Aloud() {
         <BlinkCam
           onLongBlink={() => longBlinkRef.current()}
           onEyesClosed={(c) => setEyesClosed(c)}
+          onCalibrating={(c) => setCalibrating(c)}
+          recalNonce={recalNonce}
+          say={speech.say}
           onError={(m) => { flashToast(m); setCamOn(false); }}
         />
       )}
 
       {speech.announce && <Announce data={speech.announce} speaking={speech.speaking} onDone={dismissAnnounce} />}
       {toast && <div className="toast">{toast}</div>}
-      {showHelp && <HelpSheet onClose={() => setShowHelp(false)} />}
+      {showHelp && <HelpSheet onClose={() => setShowHelp(false)} onRecalibrate={() => { setShowHelp(false); setRecalNonce((n) => n + 1); }} />}
     </div>
   );
 }
@@ -295,7 +300,7 @@ function KeyStart({ onBegin }) {
   return null;
 }
 
-function HelpSheet({ onClose }) {
+function HelpSheet({ onClose, onRecalibrate }) {
   return (
     <div className="overlay" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
@@ -306,7 +311,14 @@ function HelpSheet({ onClose }) {
           <div className="st"><span className="si"><LIcon name="Eye" size={20} /></span><span><div className="stt">Long-blink to choose</div><div className="std">When the highlight lands on what you want, hold your eyes shut for about a second.</div></span></div>
           <div className="st"><span className="si"><LIcon name="Keyboard" size={20} /></span><span><div className="stt">Spell anything</div><div className="std">Open “Spell it out” to compose a custom message — predictions do most of the work.</div></span></div>
         </div>
-        <button className="close" onClick={onClose}>Got it</button>
+        <div className="sheet-actions">
+          {onRecalibrate && (
+            <button className="recal" onClick={onRecalibrate}>
+              <LIcon name="ScanFace" size={17} stroke={2} /> Recalibrate eye control
+            </button>
+          )}
+          <button className="close" onClick={onClose}>Got it</button>
+        </div>
       </div>
     </div>
   );
