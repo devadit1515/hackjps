@@ -123,10 +123,10 @@ const Speller = forwardRef(function Speller(
     if (!isClear && clearArmed) setClearArmed(false); // any other choice cancels a pending clear
 
     switch (item.kind) {
-      case "letter": ed.addLetter(item.value); if (speakLetters) say(item.value); cues.add(); break;
+      case "letter": ed.addLetter(item.value); if (speakLetters) say(item.value); break;
       case "space": ed.addSpace(); break;
       case "punct": ed.addPunct(item.value); break;
-      case "suggestion": ed.setText(item.value); cues.add(); break;
+      case "suggestion": ed.setText(item.value); break;
       case "recent": doSpeakText(item.value); setRecentOpen(false); return;
       case "note": setRecentOpen(false); return;
       case "edit":
@@ -155,9 +155,8 @@ const Speller = forwardRef(function Speller(
   /* ---------- selection (long blink / Space / click) ---------- */
   const handleSelect = useCallback(() => {
     if (!active) return;
-    if (resting) { setResting(false); cues.select(); return; }
+    if (resting) { setResting(false); return; } // BlinkCam already chimes on the blink
     const ev = machineRef.current.select();
-    cues.select();
     if (ev.type === "back") { if (recentOpen) setRecentOpen(false); else bump(); return; }
     if (ev.type === "enterRow") { bump(); return; }
     if (ev.type === "cell") applyCell(ev.item);

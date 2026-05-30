@@ -130,7 +130,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .choice.is-word .c-label { font-family: var(--main); font-weight: 700; font-size: clamp(18px, 2vw, 23px); letter-spacing: 0; }
 
 .choice:hover { transform: translateY(-5px); border-color: rgba(187,87,51,0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 4px rgba(33,28,22,0.05), 0 28px 52px -28px rgba(33,28,22,0.6); }
-.choice.focus { border-color: var(--clay); transform: translateY(-6px) scale(1.045); box-shadow: 0 0 0 2px var(--clay), inset 0 1px 0 rgba(255,255,255,0.9), 0 32px 60px -24px rgba(187,87,51,0.7); }
+.choice.focus { border-color: var(--clay); transform: translateY(-5px) scale(1.04); box-shadow: 0 0 0 2px var(--clay), inset 0 1px 0 rgba(255,255,255,0.9), 0 16px 32px -22px rgba(187,87,51,0.5); }
 .choice.focus:not(.sub) .c-ico { transform: scale(1.1) translateY(-1px); background: radial-gradient(circle at 50% 30%, rgba(187,87,51,0.30), rgba(187,87,51,0.10)); color: var(--clay-deep); }
 .choice.focus .c-label { color: var(--clay-deep); }
 
@@ -203,6 +203,13 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .cam-bubble.blinking { border-color: var(--clay); box-shadow: 0 0 0 2px var(--clay); }
 .cam-bubble .eyemeter { position: absolute; top: 8px; left: 8px; right: 8px; height: 3px; border-radius: 3px; background: rgba(255,255,255,0.18); overflow: hidden; }
 .cam-bubble .eyemeter i { display: block; height: 100%; background: var(--clay); width: 0%; transition: width 0.06s linear; }
+/* dwell-to-select progress: fills as the eyes are held shut */
+.cam-bubble .cam-hold { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.14); }
+.cam-bubble .cam-hold i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--clay), #e08a5c); transition: width 0.05s linear; }
+.cam-bubble.blinking { border-color: var(--clay); box-shadow: 0 0 0 2px var(--clay); }
+.cam-bubble.fired { border-color: #7fc99a; box-shadow: 0 0 0 2px #7fc99a; }
+.cam-bubble.fired .cam-hold i { background: #7fc99a; }
+.cam-bubble.fired .cam-state .ring { background: #7fc99a; box-shadow: 0 0 8px #7fc99a; }
 .cam-bubble .gaze-arrow { position: absolute; inset: 0; display: grid; place-items: center; font-size: 46px; color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,0.6); animation: arrowpop 0.18s var(--spring); }
 @keyframes arrowpop { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
 
@@ -339,13 +346,13 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .sp-cell.k-recent { flex: 1 1 0; }
 .sp-cell.k-note { flex: 1 1 0; background: none; border-style: dashed; color: var(--ink-faint); box-shadow: none; }
 
-.sp-cell.on { border-color: var(--clay); transform: translateY(-2px) scale(1.05); box-shadow: 0 0 0 2px var(--clay), 0 14px 26px -16px rgba(187, 87, 51, 0.7); color: var(--clay-deep); z-index: 2; }
+.sp-cell.on { border-color: var(--clay); transform: translateY(-2px) scale(1.05); box-shadow: 0 0 0 2px var(--clay), 0 7px 14px -10px rgba(187, 87, 51, 0.5); color: var(--clay-deep); z-index: 2; }
 .sp-cell.on .sp-ico { color: var(--clay-deep); }
 
 /* urgent (call for help) + armed (clear confirm) */
 .sp-cell.urgent { background: linear-gradient(180deg, #f9eae3, #f1d8ce); border-color: rgba(163, 45, 24, 0.32); color: #a32d18; }
 .sp-cell.urgent .sp-ico { color: #a32d18; }
-.sp-cell.urgent.on { border-color: #a32d18; box-shadow: 0 0 0 2px #a32d18, 0 14px 26px -16px rgba(163, 45, 24, 0.75); color: #8f2614; }
+.sp-cell.urgent.on { border-color: #a32d18; box-shadow: 0 0 0 2px #a32d18, 0 7px 14px -10px rgba(163, 45, 24, 0.6); color: #8f2614; }
 .sp-cell.armed { background: #f7e7e0; border-color: rgba(163, 45, 24, 0.4); color: #a32d18; }
 
 .sp-hint { flex: 0 0 auto; text-align: center; padding: clamp(6px, 1.2vh, 14px) 8px 2px; font-family: var(--main); font-size: 13px; color: var(--ink-faint); display: flex; align-items: center; justify-content: center; gap: 10px; }
