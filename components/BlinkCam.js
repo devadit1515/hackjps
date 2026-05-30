@@ -16,15 +16,15 @@ const LONG_MIN = 850, LONG_MAX = 2800;    // long blink → done / dismiss
 // gaze
 const GAZE_FIRE = 0.5, GAZE_RECENTER = 0.3, GAZE_COOLDOWN = 420;
 
-export default function BlinkCam({ onBlink, onLongBlink, onGaze, onError }) {
+export default function BlinkCam({ onBlink, onLongBlink, onGaze, onEyesClosed, onError }) {
   const videoRef = useRef(null);
   const [armed, setArmed] = useState(false);
   const [meter, setMeter] = useState(0);
   const [blinking, setBlinking] = useState(false);
   const [dir, setDir] = useState(null);
 
-  const cb = useRef({ onBlink, onLongBlink, onGaze, onError });
-  cb.current = { onBlink, onLongBlink, onGaze, onError };
+  const cb = useRef({ onBlink, onLongBlink, onGaze, onEyesClosed, onError });
+  cb.current = { onBlink, onLongBlink, onGaze, onEyesClosed, onError };
 
   useEffect(() => {
     let landmarker = null, stream = null, raf = 0, cancelled = false;
@@ -70,9 +70,9 @@ export default function BlinkCam({ onBlink, onLongBlink, onGaze, onError }) {
           // ---- blink (select) ----
           const blink = (g("eyeBlinkLeft") + g("eyeBlinkRight")) / 2;
           setMeter(blink);
-          if (!closed && blink > CLOSE) { closed = true; closedStart = now; setBlinking(true); }
+          if (!closed && blink > CLOSE) { closed = true; closedStart = now; setBlinking(true); cb.current.onEyesClosed?.(true); }
           else if (closed && blink < OPEN) {
-            closed = false; setBlinking(false);
+            closed = false; setBlinking(false); cb.current.onEyesClosed?.(false);
             const d = now - closedStart;
             if (now - lastBlink > BLINK_COOLDOWN) {
               if (d >= SHORT_MIN && d <= SHORT_MAX) { lastBlink = now; cb.current.onBlink?.(); }
@@ -112,16 +112,13 @@ export default function BlinkCam({ onBlink, onLongBlink, onGaze, onError }) {
     };
   }, []);
 
-  const arrow = { left: "←", right: "→", up: "↑", down: "↓" }[dir];
-
   return (
     <div className={`cam-bubble ${armed ? "armed" : ""} ${blinking ? "blinking" : ""}`}>
       <div className="eyemeter"><i style={{ width: `${Math.round(meter * 100)}%` }} /></div>
       <video ref={videoRef} muted playsInline />
-      {arrow && <div className="gaze-arrow">{arrow}</div>}
       <div className="cam-state">
         <span className="ring" />
-        {armed ? (blinking ? "Blink — select" : "Tracking your eyes") : "Starting camera…"}
+        {armed ? (blinking ? "Hold to choose…" : "Tracking your eyes") : "Starting camera…"}
       </div>
     </div>
   );

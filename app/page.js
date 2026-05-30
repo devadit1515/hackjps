@@ -13,6 +13,9 @@ function LIcon({ name, size = 30, stroke = 1.5 }) {
   return <Cmp size={size} strokeWidth={stroke} aria-hidden />;
 }
 
+// How long the highlight rests on each choice before walking to the next one.
+const SCAN_MS = 1700;
+
 export default function Aloud() {
   const [started, setStarted] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -26,6 +29,7 @@ export default function Aloud() {
   const [focusIdx, setFocusIdx] = useState(null);
   const [hovering, setHovering] = useState(false);
   const [dwellLocked, setDwellLocked] = useState(false);
+  const [eyesClosed, setEyesClosed] = useState(false); // freeze the scan while a blink is in progress
 
   const voiceRef = useRef(null);
   const announcingRef = useRef(false);
@@ -98,7 +102,23 @@ export default function Aloud() {
   }, [view]);
 
   const cols = primary.length === 4 ? 2 : primary.length === 6 ? 3 : primary.length <= 2 ? 2 : 3;
-  useEffect(() => { setFocusIdx(null); }, [view]);
+
+  // Whenever the screen changes, put the highlight back on the first choice.
+  useEffect(() => { setFocusIdx(started ? 0 : null); }, [view, started]);
+
+  /* ---------- auto-scan: the highlight walks the choices on its own ----------
+     Pauses while a blink is in progress (eyesClosed) so a long blink selects the
+     option the border was resting on — not one it drifted to while eyes were shut.
+     Also pauses during an announcement, the help sheet, or a mouse hover. */
+  useEffect(() => {
+    if (!started || announce || showHelp || hovering || eyesClosed) return;
+    const n = targets.length;
+    if (!n) return;
+    const id = setInterval(() => {
+      setFocusIdx((i) => (i == null ? 0 : (i + 1) % n));
+    }, SCAN_MS);
+    return () => clearInterval(id);
+  }, [started, announce, showHelp, hovering, eyesClosed, targets.length]);
 
   /* ---------- selection ---------- */
   const select = useCallback((item) => {
@@ -119,6 +139,7 @@ export default function Aloud() {
     if (focusIdx != null && targets[focusIdx]) select(targets[focusIdx]);
   }, [focusIdx, targets, select]);
 
+  // Keyboard moves the highlight (for testing / a helper); kept simple.
   const moveFocus = useCallback((dir) => {
     setHovering(false);
     const n = targets.length;
@@ -152,15 +173,19 @@ export default function Aloud() {
     return () => window.removeEventListener("keydown", onKey);
   }, [started, showHelp, announce, moveFocus, selectFocused, stopAnnounce]);
 
-  useEffect(() => { if (camOn) setFocusIdx((i) => (i == null ? 0 : i)); }, [camOn, view, announce]);
-
-  /* ---------- eye refs (latest) ---------- */
-  const blinkRef = useRef(() => {});
+  /* ---------- eye control (latest via refs) ----------
+     The whole interface is one switch: a deliberate LONG blink.
+     - on the boards: it selects whatever the scanning highlight is resting on.
+     - on an announcement: it clears the message ("I'm okay now").
+     A normal quick blink does nothing, so involuntary blinks never select. */
   const longBlinkRef = useRef(() => {});
-  const gazeRef = useRef(() => {});
-  useEffect(() => { blinkRef.current = () => { if (!started || showHelp || announce) return; selectFocused(); }; });
-  useEffect(() => { longBlinkRef.current = () => { if (announce) stopAnnounce(); }; });
-  useEffect(() => { gazeRef.current = (d) => { if (started && !showHelp && !announce) moveFocus(d); }; });
+  useEffect(() => {
+    longBlinkRef.current = () => {
+      if (!started || showHelp) return;
+      if (announce) { stopAnnounce(); return; }
+      selectFocused();
+    };
+  });
 
   function flashToast(m) { setToast(m); setTimeout(() => setToast(""), 4000); }
 
@@ -197,7 +222,7 @@ export default function Aloud() {
         key={item.key}
         className={cls}
         onMouseEnter={() => { setFocusIdx(idx); setHovering(true); }}
-        onMouseLeave={() => { setFocusIdx(null); setHovering(false); setDwellLocked(false); }}
+        onMouseLeave={() => { setHovering(false); setDwellLocked(false); }}
         onClick={() => select(item)}
         aria-label={item.label}
       >
@@ -235,14 +260,13 @@ export default function Aloud() {
       </main>
 
       <footer className="hint">
-        {camOn ? <><span className="live" /> Look to move · blink to choose</> : <>Hover to dwell, or use <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> then <kbd>Space</kbd></>}
+        {camOn ? <><span className="live" /> The highlight moves on its own · long-blink to choose</> : <>Hover to dwell, or use <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> then <kbd>Space</kbd></>}
       </footer>
 
       {camOn && (
         <BlinkCam
-          onBlink={() => blinkRef.current()}
           onLongBlink={() => longBlinkRef.current()}
-          onGaze={(d) => gazeRef.current(d)}
+          onEyesClosed={(c) => setEyesClosed(c)}
           onError={(m) => { flashToast(m); setCamOn(false); }}
         />
       )}
@@ -270,7 +294,7 @@ function Announce({ data, speaking, onDone }) {
         <LIcon name="Check" size={22} stroke={2.2} /> Done — I&apos;m okay now
         {dwell && <span className="dwell-bar" onAnimationEnd={onDone} />}
       </button>
-      <span className="a-hint">When you&apos;re okay again, look at <b>Done</b> and blink — or just hold your eyes shut for a moment.</span>
+      <span className="a-hint">When you&apos;re okay again, just hold your eyes shut for a moment — or look at <b>Done</b> and long-blink.</span>
     </div>
   );
 }
@@ -291,7 +315,7 @@ function Intro({ onBegin }) {
           Begin with eye control
           {dwell && <span className="dwell-bar" onAnimationEnd={onBegin} />}
         </button>
-        <span className="i-hint">A helper taps once to turn on the camera. After that you control everything with your eyes — <b>look</b> to move, <b>blink</b> to choose, <b>long blink</b> for done.</span>
+        <span className="i-hint">A helper taps once to turn on the camera. After that the highlight moves through the choices on its own — when it lands on what you want, <b>hold your eyes shut for a moment</b> to choose.</span>
       </div>
       <KeyStart onBegin={onBegin} />
     </div>
@@ -314,9 +338,9 @@ function HelpSheet({ onClose }) {
         <h2>Speaking with your eyes</h2>
         <p>Choose a word and Aloud says it aloud — then shows it big and repeats it until you signal you&apos;re okay. No typing, no hands.</p>
         <div className="steps">
-          <div className="st"><span className="si"><LIcon name="Eye" size={20} /></span><span><div className="stt">Look to move</div><div className="std">Your gaze moves the highlight between choices.</div></span></div>
-          <div className="st"><span className="si"><LIcon name="Sparkle" size={20} /></span><span><div className="stt">Blink to choose</div><div className="std">A quick blink selects the highlighted card and announces it.</div></span></div>
-          <div className="st"><span className="si"><LIcon name="Check" size={20} /></span><span><div className="stt">Long blink for Done</div><div className="std">Hold your eyes shut for about a second to dismiss the message.</div></span></div>
+          <div className="st"><span className="si"><LIcon name="ScanLine" size={20} /></span><span><div className="stt">It scans for you</div><div className="std">The highlight moves through the choices on its own — you just watch and wait.</div></span></div>
+          <div className="st"><span className="si"><LIcon name="Eye" size={20} /></span><span><div className="stt">Long-blink to choose</div><div className="std">When the highlight lands on what you want, hold your eyes shut for about a second.</div></span></div>
+          <div className="st"><span className="si"><LIcon name="Volume2" size={20} /></span><span><div className="stt">It speaks for you</div><div className="std">Your words fill the screen and repeat aloud — long-blink again to clear them.</div></span></div>
         </div>
         <button className="close" onClick={onClose}>Got it</button>
       </div>
