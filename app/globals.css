@@ -112,7 +112,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
   background: linear-gradient(180deg, #fffdf8, #f5f0e7);
   border: 1px solid rgba(33, 28, 22, 0.07); border-radius: 26px; color: var(--ink); text-align: center;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 4px rgba(33,28,22,0.04), 0 20px 40px -26px rgba(33,28,22,0.55);
-  transition: transform 0.34s var(--spring), border-color 0.3s, box-shadow 0.34s, background 0.3s;
+  transition: transform 0.3s var(--ease), border-color 0.26s, box-shadow 0.28s, background 0.26s;
   animation: choiceIn 0.6s var(--ease) backwards;
 }
 .choice:nth-child(1){animation-delay:.04s} .choice:nth-child(2){animation-delay:.10s} .choice:nth-child(3){animation-delay:.16s}
@@ -123,14 +123,14 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
   width: clamp(44px, 7.5vh, 68px); height: clamp(44px, 7.5vh, 68px); border-radius: 18px; display: grid; place-items: center;
   color: var(--clay); background: radial-gradient(circle at 50% 30%, rgba(187,87,51,0.17), rgba(187,87,51,0.05));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), inset 0 0 0 1px rgba(187,87,51,0.10);
-  transition: transform 0.34s var(--spring), background 0.3s, color 0.3s;
+  transition: transform 0.3s var(--ease), background 0.3s, color 0.3s;
 }
 .choice .c-ico svg { width: clamp(26px, 3vw, 32px); height: auto; }
 .choice .c-label { font-family: var(--display); font-weight: 400; font-size: clamp(20px, 2.4vw, 29px); letter-spacing: -0.01em; color: var(--ink); }
 .choice.is-word .c-label { font-family: var(--main); font-weight: 700; font-size: clamp(18px, 2vw, 23px); letter-spacing: 0; }
 
 .choice:hover { transform: translateY(-5px); border-color: rgba(187,87,51,0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 4px rgba(33,28,22,0.05), 0 28px 52px -28px rgba(33,28,22,0.6); }
-.choice.focus { border-color: var(--clay); transform: translateY(-5px) scale(1.04); box-shadow: 0 0 0 2px var(--clay), inset 0 1px 0 rgba(255,255,255,0.9), 0 16px 32px -22px rgba(187,87,51,0.5); }
+.choice.focus { border-color: var(--clay); transform: translateY(-4px) scale(1.035); box-shadow: 0 0 0 2px var(--clay), inset 0 1px 0 rgba(255,255,255,0.9), 0 16px 32px -22px rgba(187,87,51,0.5); }
 .choice.focus:not(.sub) .c-ico { transform: scale(1.1) translateY(-1px); background: radial-gradient(circle at 50% 30%, rgba(187,87,51,0.30), rgba(187,87,51,0.10)); color: var(--clay-deep); }
 .choice.focus .c-label { color: var(--clay-deep); }
 
@@ -320,7 +320,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 
 /* the scanning grid — 6 equal rows fill the remaining height, never scrolls */
 .sp-grid { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: clamp(5px, 0.9vh, 11px); }
-.sp-row { flex: 1; min-height: 0; display: flex; align-items: stretch; gap: 8px; padding: 3px 4px; border-radius: 16px; transition: background .18s; }
+.sp-row { flex: 1; min-height: 0; display: flex; align-items: stretch; gap: 8px; padding: 3px 4px; border-radius: 16px; transition: background 0.22s var(--ease); }
 .sp-row.row-on { background: var(--clay-wash); }
 .sp-rowtag { flex: 0 0 auto; align-self: center; width: clamp(30px, 4.4vw, 58px); text-align: right;
   font-family: var(--main); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
@@ -334,7 +334,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
   padding: 4px 6px; border-radius: 13px; color: var(--ink);
   background: linear-gradient(180deg, #fffdf8, #f4eee4); border: 1px solid rgba(33, 28, 22, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 2px rgba(33, 28, 22, 0.04);
-  font-family: var(--main); font-weight: 700; transition: transform .16s var(--spring), border-color .2s, box-shadow .2s, background .2s, color .2s;
+  font-family: var(--main); font-weight: 700; transition: transform 0.2s var(--ease), border-color 0.18s, box-shadow 0.2s, background 0.2s, color 0.18s;
 }
 .sp-cell .sp-ico { color: var(--clay); line-height: 0; }
 .sp-cell .sp-cap { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(11px, 1.3vw, 14px); }
@@ -352,7 +352,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .sp-cell.k-say.on { border-color: var(--clay-deep); color: #fff; box-shadow: 0 0 0 2px var(--clay-deep), 0 9px 18px -10px rgba(187,87,51,0.9); }
 .sp-cell.k-say.on .sp-ico { color: #fff; }
 
-.sp-cell.on { border-color: var(--clay); transform: translateY(-2px) scale(1.05); box-shadow: 0 0 0 2px var(--clay), 0 7px 14px -10px rgba(187, 87, 51, 0.5); color: var(--clay-deep); z-index: 2; }
+.sp-cell.on { border-color: var(--clay); transform: translateY(-2px) scale(1.035); box-shadow: 0 0 0 2px var(--clay), 0 7px 14px -10px rgba(187, 87, 51, 0.5); color: var(--clay-deep); z-index: 2; }
 .sp-cell.on .sp-ico { color: var(--clay-deep); }
 
 /* urgent (call for help) + armed (clear confirm) */

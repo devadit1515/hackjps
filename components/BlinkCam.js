@@ -17,7 +17,7 @@ const CLOSE = 0.45;     // eyes considered shut above this (the stronger of the 
 const OPEN = 0.25;      // ...and open again below this (hysteresis kills flicker)
 const HOLD_MS = 500;    // hold them shut ~half a second → fires
 const REFIRE_MS = 550;  // brief lockout after a fire, so one hold = one action
-const DETECT_MS = 45;   // cap inference to ~22fps so the rest of the UI stays smooth
+const DETECT_MS = 62;   // cap inference to ~16fps so the rest of the UI stays smooth
 
 export default function BlinkCam({ onLongBlink, onEyesClosed, onError }) {
   const videoRef = useRef(null);
