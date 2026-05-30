@@ -72,8 +72,8 @@ const Speller = forwardRef(function Speller(
 
   /* ---------- grid ---------- */
   const rows = useMemo(
-    () => (recentOpen ? recentRows(recents) : buildRows(suggestions)),
-    [recentOpen, recents, suggestions]
+    () => (recentOpen ? recentRows(recents) : buildRows(suggestions, text.trim().length > 0)),
+    [recentOpen, recents, suggestions, text]
   );
 
   useEffect(() => {
@@ -110,6 +110,13 @@ const Speller = forwardRef(function Speller(
   }, [onSpoke, startAnnounce]);
 
   const doSpeak = useCallback(() => doSpeakText(editorRef.current.text), [doSpeakText]);
+  // The prominent "Say it" cell: announce, then return to Home when dismissed.
+  const doSpeakHome = useCallback(() => {
+    const t = editorRef.current.text.trim();
+    if (!t) return;
+    onSpoke?.(t);
+    startAnnounce(t, { returnTo: "home" });
+  }, [onSpoke, startAnnounce]);
   const doCall = useCallback(() => {
     cues.warn();
     startAnnounce("I need help. Please come quickly.", { urgent: true, returnTo: "spell" });
@@ -127,6 +134,7 @@ const Speller = forwardRef(function Speller(
       case "space": ed.addSpace(); break;
       case "punct": ed.addPunct(item.value); break;
       case "suggestion": ed.setText(item.value); break;
+      case "say": doSpeakHome(); return;
       case "recent": doSpeakText(item.value); setRecentOpen(false); return;
       case "note": setRecentOpen(false); return;
       case "edit":
@@ -150,7 +158,7 @@ const Speller = forwardRef(function Speller(
     const t = ed.text;
     setText(t);
     refreshSuggestions(t);
-  }, [clearArmed, speakLetters, say, doSpeak, doCall, doSpeakText, refreshSuggestions]);
+  }, [clearArmed, speakLetters, say, doSpeak, doSpeakHome, doCall, doSpeakText, refreshSuggestions]);
 
   /* ---------- selection (long blink / Space / click) ---------- */
   const handleSelect = useCallback(() => {
