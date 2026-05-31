@@ -1,152 +1,113 @@
-# Aloud — 3-minute video script & teleprompter
+# Aloud — video script (3 min)
 
-> Goal: empathetic, powerful, and unmistakably *real* — a project that earns its place. Front-load the human story, let the **spoken-aloud moment** land, then prove you own the code.
+Lines in quotes are what you actually say — say them like you talk. Italic lines are what to do on screen.
 
----
+**Time:** Problem 0:00–0:25 · Demo 0:25–1:55 · Code 1:55–2:50 · Close 2:50–3:00.
 
-## The plan (time budget)
-
-| Segment | Time | Length | What's on screen |
-| --- | --- | --- | --- |
-| **1. The problem** | 0:00 – 0:25 | 25s | You to camera / simple title |
-| **2. Product + live demo** | 0:25 – 1:55 | 90s | The live app (aloud-pink.vercel.app) |
-| **3. The code** | 1:55 – 2:50 | 55s | VS Code (the `aloud` folder) |
-| **4. Close** | 2:50 – 3:00 | 10s | Back to the app |
-
-The **demo is the star**, so it gets the extra time — ≈90s, about 10s longer than before. The problem stays a punchy 25s and the code is the final ~55s. Empathy first, the live demo carries the middle, the code is scripted word-for-word below. *(Want the full +15s on the demo instead? Trim the problem to 0:20 and start the demo at 0:20.)*
-
-### Pre-flight checklist (do these before recording)
-- [x] **Folder is named `aloud`** — done (matches the app name on screen).
-- [ ] **Bump VS Code font size** (Ctrl + `=` a few times) so code is legible on video; collapse the terminal.
-- [ ] Use the **live site** for the demo so the **AI suggestions work** (the Gemini key is set on Vercel). Keep `npm run dev` as a backup.
-- [ ] Silence notifications, close stray tabs, test mic + screen recorder, record at 1080p.
-- [ ] Rehearse the **"In one breath"** paragraph (Segment 3) until it's automatic.
+**Before you record**
+- Folder is named `aloud` ✓
+- Bump the VS Code font size so code is readable on video; hide the terminal.
+- Run the demo on the **live site** (aloud-pink.vercel.app) so the AI suggestions work. `npm run dev` as backup.
+- Mute notifications, close extra tabs, test your mic, record at 1080p.
+- If blinking to the camera is awkward on video, drive it with the keyboard (arrows + Space) and just say the blink is the real input.
 
 ---
 
-## Segment 1 — The problem (0:00 – 0:25)
+## 1. The problem (0:00 – 0:25)
 
-**[SAY]** *(calm, human, unhurried)*
-> "Imagine being completely awake — every thought, every feeling intact — but unable to move, speak, or even nod. For people with ALS, locked-in syndrome, or advanced cerebral palsy, that's everyday life. They have urgent things to say — *I'm in pain*, *I love you* — and no way to say them. The tools that exist are slow, expensive, and exhausting — many make you spell out every single letter, sometimes in Morse code."
+"Some people can't move or speak at all — ALS, locked-in syndrome, late-stage cerebral palsy — but they're fully awake, with things they need to say. The tools for this are slow and expensive, and a lot of them make you spell out every letter, sometimes in Morse code. So I built something faster."
 
-**[SHOW]** You speaking to camera, or a plain "Aloud" title card. Authenticity beats production value here.
-
----
-
-## Segment 2 — Product + live demo (0:25 – 1:55)  ← *the star: run it on the live site so the AI works*
-
-> Drive it with your eyes if you can; if blinking on camera is fiddly, press **Space** to select and tell them *the blink is the real switch*. **Golden rule: let every spoken sentence finish before you talk again** — the silence is what sells it.
-
-**Beat A — In control in six seconds (0:25 – 0:42)**
-**[SAY]**
-> "This is Aloud. A helper taps the camera on once — and from this moment, everything here is mine to control with one movement: a blink. First, it tunes itself to my eyes and my lighting…"
-
-**[SHOW]** Intro screen → click **Begin with eye control** → the quick calibration runs (*keep your eyes open* → *now close your eyes* → **All set**) → the home board appears. *Don't cut the ~6-second calibration — a system that adapts itself to each person is part of the wow.*
-
-**Beat B — One blink, a real voice (0:42 – 1:08)**  ← *the emotional peak; do not rush this*
-**[SAY]**
-> "Now watch the whole interface. The highlight moves through the choices **on its own** — I don't aim, I don't reach, I don't press. When it lands on what I need… I just close my eyes, and hold."
-
-**[SHOW]** Let the highlight auto-scan the home board → land on **I feel** → long-blink → it opens → scan to **in pain** → long-blink → the screen fills with **"I'm in pain,"** spoken aloud in a real voice.
-**[PAUSE — two full seconds of silence. Let it speak. This is the entire point of the project.]**
-**[SAY]** *(quietly, once it finishes)*
-> "A whole sentence. A real voice. From a single blink — no typing, no spelling, no Morse code."
-
-**Beat C — Not just survival (1:08 – 1:25)**  ← *the beat that wins hearts*
-**[SAY]**
-> "And it isn't only emergencies. When you lose your voice, the hardest thing to lose isn't asking for water — it's everyone you can no longer reach."
-
-**[SHOW]** Long-blink back home → scan to **People** (the whole board shifts to green) → open it → land on **I love you** → long-blink → **"I love you."** speaks. **[PAUSE — let it land.]**
-
-**Beat D — A few letters become a sentence (1:25 – 1:46)**  ← *the technical wow judges remember*
-**[SAY]**
-> "When the words aren't ready-made, I can spell anything — but I almost never type the whole thing. Watch: I choose just a few letters…"
-
-**[SHOW]** Open **Spell it out** → pick a handful of letters (e.g. `c o l d  w`) → the **✨ AI suggestions** appear in the top row.
-**[SAY]**
-> "…and the AI reads those fragments and writes the full, natural sentence I was reaching for."
-
-**[SHOW]** Choose the ✨ suggestion → it speaks something like **"Could I please have some cold water?"**
-
-**Beat E — Learns you, guards you, needs no internet (1:46 – 1:55)**
-**[SAY]**
-> "It learns the words I use most, so they rise to the top over time. There's always a one-blink **call for help**, because they may be alone. And every bit of this runs on the laptop — my face never leaves the device, and it works with no internet at all. The AI is an upgrade, never a crutch."
-
-**[SHOW]** Gesture to the learned suggestions and the red **call for help** action; if it's easy, drop Wi-Fi for a second to show a board still speaks.
+*On screen: you talking, or a plain Aloud title card.*
 
 ---
 
-## Segment 3 — The code (1:55 – 2:50)  ← *the memorized ~55 seconds*
+## 2. The demo (0:25 – 1:55)
 
-Switch to **VS Code**. Don't read code line-by-line — **point at files and tell the story.** Click each file as you reach it.
+*Run it on the live site. Let each spoken line finish before you keep talking.*
 
-> **Memorize this. ~60 seconds. Each sentence = one file to click.**
+**0:25 — Turning it on**
+"This is Aloud. Someone turns the camera on once, and after that I run the whole thing with my eyes. It spends about six seconds learning my blink first — everyone's eyes and lighting are different, so it tunes itself to me."
+*Click Begin → let the setup run (eyes open, then eyes closed) → land on the home screen.*
 
-**[POINT: the `lib/` folder in the Explorer]**
-> "The whole thing is a Next.js app, and I kept it deliberately small — one input, one output, and a clean path between them. All the real logic is these **seven files in `lib/`**, and it's covered by unit tests."
+**0:42 — How you actually use it**
+"The highlight moves on its own. When it's on what I want, I close my eyes and hold for about a second. A normal blink is too quick to count, so I never pick something by accident."
+*Let it scan to **I feel**, hold → it opens → scan to **in pain**, hold → it says "I'm in pain" out loud.*
+"A full sentence, out loud, from one blink. And the most urgent things — pain, breathing — are first, so they're the fastest to reach."
 
-**[POINT: `components/BlinkCam.js`]**
-> "The input is the eyes. **BlinkCam** runs **MediaPipe's FaceLandmarker** — a neural network — on-device, and reads a blink score every frame. Holding your eyes shut past half a second fires **one 'select'**."
+**1:08 — Not just medical**
+"It's not all emergencies either. When you can't talk, the part you miss most isn't asking for water — it's the people."
+*Go back → open **People** (the board turns green) → land on **I love you**, hold → it speaks.*
 
-**[POINT: `lib/blink.mjs`]**
-> "Because everyone's eyes and lighting differ, **`blink.mjs`** calibrates that threshold to each person in about six seconds — it samples eyes-open, then eyes-closed, and puts the cutoff in the gap."
+**1:25 — The AI does the hard part**
+"If what I want isn't already a button, I can spell it — but spelling letter by letter with your eyes is exhausting, so I barely have to. I pick a couple of letters…"
+*Open **Spell it out** → choose a few letters (`c o l d  w`) → the ✨ AI suggestions appear.*
+"…and the AI writes the full sentence for me."
+*Pick the suggestion → it says something like "Could I please have some cold water?"*
 
-**[POINT: `lib/speller.mjs`]**
-> "That single select drives an auto-scanner. On the boards it's a moving highlight; in the speller it's this **two-level state machine** — it scans the rows, you blink to open a row, then it scans the letters."
-
-**[POINT: `lib/predict.mjs`]**
-> "Then the hardest part — turning a few eye-picks into a real sentence. **`predict.mjs`** is a **hybrid**: an instant offline model for words and phrases, a **personalization** model that learns what you actually say, and an optional **Gemini** call that turns sparse keywords into full sentences — all merged and **de-duplicated by meaning** so you never see the same idea twice."
-
-**[POINT: `lib/useSpeech.js`, then `app/api/suggest/route.js`]**
-> "Finally **`useSpeech`** speaks it with the browser's speech API. The Gemini key stays **server-side** in this one route, never in the browser — and offline, everything still works. The AI is an upgrade, not a dependency."
-
----
-
-## Segment 4 — Close (2:50 – 3:00)
-
-**[SAY]**
-> "Aloud is private by default, runs on any laptop with a webcam, and gives people their voice back with nothing but a blink. I built it solo, in two days — for the people who have everything to say, and no way to say it."
-
-**[SHOW]** Back to the app — long-blink **People → I love you** and let it speak, or land on the Aloud title.
+**1:46 — Why it holds up**
+"It also remembers what I say a lot and pushes it to the top, there's a call-for-help button that's always one blink away in case I'm alone, and it all runs on the laptop — no internet needed, and the camera feed never leaves the device."
+*Point at the suggestions and the red **call for help** key.*
 
 ---
 
-## Q&A defense cheat-sheet
-*Read this twice before recording. If a judge asks, you answer cold — this is what proves it's yours.*
+## 3. The code (1:55 – 2:50)
 
-**One line per file:**
-| File | "What does this do?" |
+*Switch to VS Code. Don't read code — open each file as you mention it. This is where you show you actually understand what you built, so practice it until it's smooth.*
+
+"It's a Next.js app, and I kept it small on purpose — one input, one output. All the real logic is seven files in `lib/`, with unit tests."
+*(open the `lib/` folder)*
+
+"The input is the eyes. `BlinkCam` runs MediaPipe's face model right in the browser and reads how shut my eyes are every frame. Holding past about half a second counts as one pick."
+*(BlinkCam.js)*
+
+"Everyone's different, so `blink.mjs` calibrates per person — it samples your eyes open, then closed, and sets the cutoff in between."
+*(blink.mjs)*
+
+"That one pick drives the scanning. On the boards it's the moving highlight; in the speller it's a two-level scan — it goes through the rows, you pick a row, then it goes through the letters. That's `speller.mjs`."
+*(speller.mjs)*
+
+"The hardest part is turning a few letters into a real sentence. `predict.mjs` combines three things — an instant offline model, a part that learns your own phrases, and an optional Gemini call for full sentences — then drops duplicates so you don't see the same idea twice."
+*(predict.mjs)*
+
+"`useSpeech` reads it out with the browser's speech API, and the Gemini key stays on the server in this one route — never in the browser. With no key, everything still works offline."
+*(useSpeech.js, then api/suggest/route.js)*
+
+---
+
+## 4. Close (2:50 – 3:00)
+
+"It runs on any laptop with a webcam, keeps everything private, and gives someone their voice back with just a blink. I built it solo, in two days."
+*Back to the app — say "I love you" one more time, or land on the title.*
+
+---
+
+## If a judge asks (know these cold)
+
+**What each file does:**
+| File | What it does |
 | --- | --- |
-| `app/page.js` | The app shell — the intro, the boards, the auto-scan timer, and the full-screen *announce* overlay that speaks and repeats until I signal I'm okay. |
-| `components/BlinkCam.js` | Webcam + MediaPipe blink detection; turns a *held* blink into one select; also runs calibration. |
-| `components/Speller.js` | The "Spell it out" screen — owns the scan timing and rendering, pulls predictions from `predict.mjs`. |
-| `lib/board.js` | The four ready-made boards (feel / need / people / answer), ordered by urgency so pain and breathing scan first. |
-| `lib/speller.mjs` | Three pure pieces — the row→cell scan state machine, the text editor (auto-caps, auto-space, undo), and the grid layout. |
-| `lib/predict.mjs` | The suggestion engine — on-device n-gram + phrases, personalization, Gemini, and dedupe-by-meaning. |
-| `lib/lexicon.mjs` | The small built-in dictionary — word list, bigrams, and whole care-phrases, tuned for someone communicating needs. |
-| `lib/blink.mjs` | The calibration math — samples open vs. closed and puts the threshold in the gap, with a fallback if they're too similar. |
-| `lib/cues.mjs` | Tiny Web Audio confirmation tones. |
-| `lib/useSpeech.js` | The Web Speech API hook — picks a natural voice and loops the announcement. |
-| `app/api/suggest/route.js` | The only server code — holds the Gemini key, calls `gemini-2.5-flash`; with no key it returns a *disabled* flag and the app stays fully offline. |
+| `app/page.js` | The app shell — intro, the boards, the auto-scan timer, and the full-screen message that speaks and repeats until I say I'm okay. |
+| `components/BlinkCam.js` | Webcam + MediaPipe blink detection; turns a held blink into one pick; also runs calibration. |
+| `components/Speller.js` | The spell screen — handles the scan timing and rendering, and pulls suggestions from `predict.mjs`. |
+| `lib/board.js` | The four ready-made boards (feel / need / people / answer), ordered by urgency so pain and breathing come first. |
+| `lib/speller.mjs` | Three pieces — the row-then-cell scan, the text editor (auto-caps, spacing, undo), and the grid layout. |
+| `lib/predict.mjs` | The suggestion engine — offline model, personalization, Gemini, and dedupe. |
+| `lib/lexicon.mjs` | The built-in word list, common word pairs, and whole care-phrases. |
+| `lib/blink.mjs` | The calibration math — samples open vs. closed and sets the threshold between them. |
+| `lib/cues.mjs` | Small confirmation sounds. |
+| `lib/useSpeech.js` | The speech part — picks a voice and repeats the message. |
+| `app/api/suggest/route.js` | The only server code — holds the Gemini key, calls the model; with no key it returns a "disabled" flag and the app stays offline. |
 
-**Anticipated questions:**
-- **"Did AI write this?"** → "I used AI as a coding assistant — which the rules allow — but I designed the architecture, made every product decision, and can walk you through any line. The README and the design are mine."
-- **"How is a deliberate blink different from a normal one?"** → "Duration. A natural blink is ~100–150 ms; I require the eyes held shut past **500 ms**, with a short lockout after firing, so one hold = one action and you never select by accident."
-- **"What if the camera or AI fails?"** → "It degrades gracefully — a full **keyboard fallback** (arrows + Space), and the Gemini AI is optional; on-device prediction, the boards, the speller, and speech all work **fully offline**."
-- **"Why blink detection, not eye-gaze tracking?"** → "Gaze tracking needs fragile, calibration-heavy hardware. A blink is the single most reliable movement these users retain, and MediaPipe gives me robust blink data on **any webcam, on-device, privately**."
-- **"Is it private?"** → "The **video never leaves the device** — vision, prediction, personalization, and speech all run in the browser. Only the optional Gemini *text* call touches a server, and the key lives only there."
-- **"What was genuinely hard?"** → "Two things — making selection **accurate** for someone who can only blink (the calibration + hold-to-fire with the scan frozen mid-blink), and collapsing a few eye-picks into a **fluent sentence** (the hybrid predictor). Those are the two files I'd point you to: `blink.mjs` and `predict.mjs`."
-
----
-
-## Delivery tips
-- **Segment 1:** slow down. Land each phrase. This is the empathy that wins.
-- **Segment 2:** after the message speaks aloud, **stay silent for a beat.** Let it hit.
-- **Segment 3:** point, don't read. The story *is* the file tour.
-- **Demo input:** if live-blinking is fiddly on camera, drive it with **Space** and say the blink is the real switch — totally fine.
-- **Total:** rehearse once end-to-end with a timer; trim Segment 2 first if you run long.
+**Likely questions:**
+- **"Did AI write this?"** — "I used AI to help write code, which the rules allow, but I designed it and made every decision, and I can walk you through any file. The README and design are mine."
+- **"How's a real blink different from a normal one?"** — "Time. A normal blink is about a tenth of a second; I need the eyes held shut past half a second, with a short cooldown after, so one hold is one action."
+- **"What if the camera or AI fails?"** — "There's a full keyboard fallback, and the Gemini part is optional — the boards, the speller, the offline suggestions, and the speech all work without internet."
+- **"Why blinks and not eye-gaze tracking?"** — "Gaze tracking needs fragile, heavily-calibrated hardware. A blink is the most reliable movement these users still have, and MediaPipe reads it on any webcam, on-device."
+- **"Is it private?"** — "The video never leaves the device. Only the optional Gemini text call hits a server, and the key lives only there."
+- **"What was actually hard?"** — "Two things: making the pick accurate for someone who can only blink, and turning a few letters into a fluent sentence. Those are `blink.mjs` and `predict.mjs`."
 
 ---
 
-### Reference — the README "In one breath" paragraph (same idea, prose form)
-> Aloud is a Next.js app with one input and one output. The input is a webcam frame: MediaPipe's FaceLandmarker neural network runs on-device and returns a blink score every frame; a quick per-user calibration places the close/open thresholds in the gap between eyes-open and eyes-closed, and holding the eyes shut past half a second fires a single *select*. That select drives an auto-scanner — a moving highlight on the boards, and a two-level *row → cell* state machine in the speller. Whatever is selected becomes a sentence through a hybrid predictor: an instant offline phrase/word/next-word model, a personalization model that learns what this person actually says, and an optional Gemini call that turns sparse keywords into full sentences — all merged and de-duplicated by meaning. The Web Speech API speaks the result and repeats it until dismissed. Every part of that logic lives in a small framework-free module under `lib/`, covered by unit tests.
+## Backup: the code part as one paragraph (if you'd rather say it straight through)
+
+"Aloud is a Next.js app with one input and one output. The input is the webcam: MediaPipe reads a blink score every frame, a quick calibration sets the threshold for each person, and holding your eyes shut past half a second counts as one pick. That pick drives the scanning — a moving highlight on the boards, and a two-level row-then-letter scan in the speller. Whatever you pick becomes a sentence through three combined predictors — an instant offline model, one that learns your own phrases, and an optional Gemini call for full sentences — with duplicates removed. The browser's speech API reads it out. All of that logic is in small files under `lib/`, with unit tests."
