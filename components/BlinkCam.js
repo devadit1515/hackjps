@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { icons } from "lucide-react";
-import { cues } from "@/lib/audio/cues.mjs";
-import { computeThresholds, loadThresholds, saveThresholds, DEFAULTS } from "@/lib/blinkCalibration.mjs";
+import { cues } from "@/lib/cues.mjs";
+import { computeThresholds, loadThresholds, saveThresholds, DEFAULTS } from "@/lib/blink.mjs";
 
 function LIcon({ name, size = 26, stroke = 1.6 }) {
   const Cmp = icons[name] || icons.Circle;

@@ -1,8 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildRows, ROW_LABELS } from "./layout.mjs";
-import { ScanMachine } from "./machine.mjs";
-import { Editor } from "./editor.mjs";
+import { buildRows, ROW_LABELS, ScanMachine, Editor } from "../lib/speller.mjs";
 
 /* ---------------- layout ---------------- */
 test("layout: six rows, every row ends with a back cell", () => {

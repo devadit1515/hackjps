@@ -62,6 +62,37 @@ The pure logic — the scan state machine, the editor, the predictor, the person
 - **Private by default:** vision, on-device prediction, personalization, and voice all run in the browser. The Gemini key lives only on the server; with no key the app still works fully offline.
 - This README and the design were written by the author; AI coding tools assisted with implementation.
 
+## Architecture — how the code is organized
+
+One input, one output; everything else is the path between them.
+
+**Data flow:** webcam frame → **MediaPipe** blink score (per-frame, on-device) → per-user **calibration** thresholds → a long blink = one **select** → **auto-scan** (boards: a single moving highlight; speller: a two-level *row → cell* state machine) → **hybrid predictor** (instant on-device + personalization + optional Gemini, de-duplicated by meaning) → **Web Speech** says it aloud.
+
+```
+app/
+  page.js               the app shell: intro, the auto-scanning boards, selection, announce + help overlays
+  layout.js             fonts (Atkinson Hyperlegible, designed for low vision) + metadata
+  globals.css           design system — warm paper, per-board colour, the dwell animation
+  api/suggest/route.js  server route that holds the Gemini key and turns the message-so-far into sentences
+
+components/
+  BlinkCam.js           webcam + MediaPipe blink detection + the ~6-second calibration flow — the "eye switch"
+  Speller.js            the "Spell it out" screen: drives the scan machine, merges predictions, edits the message
+
+lib/  — pure, framework-free, unit-tested
+  board.js              the four quick-phrase boards, ordered by urgency
+  speller.mjs           scan state machine + message editor + grid layout
+  predict.mjs           suggestion engine: on-device + personalization + Gemini + dedupe-by-meaning
+  lexicon.mjs           the on-device dictionary (words, bigrams, whole phrases)
+  blink.mjs             per-user blink-calibration math
+  cues.mjs              optional Web Audio confirmation tones
+  useSpeech.js          Web Speech API hook (speaks each message, loops the announcement)
+
+test/                   node --test suites for the speller, predictor, and calibration (33 tests)
+```
+
+**In one breath.** Aloud is a Next.js app with one input and one output. The input is a webcam frame: MediaPipe's FaceLandmarker neural network runs on-device and returns a blink score every frame; a quick per-user calibration places the close/open thresholds in the gap between eyes-open and eyes-closed, and holding the eyes shut past half a second fires a single *select*. That select drives an auto-scanner — a moving highlight on the boards, and a two-level *row → cell* state machine in the speller. Whatever is selected becomes a sentence through a hybrid predictor: an instant offline phrase/word/next-word model, a personalization model that learns what this person actually says, and an optional Gemini call that turns sparse keywords into full sentences — all merged and de-duplicated by meaning. The Web Speech API speaks the result and repeats it until dismissed. Every part of that logic lives in a small framework-free module under `lib/`, covered by unit tests.
+
 ## Accessibility by design
 
 - **Atkinson Hyperlegible** — the typeface engineered by the Braille Institute for low-vision readers — is used throughout.
@@ -85,10 +116,10 @@ Optional — upgrade "Spell it out" suggestions with a free [Google AI Studio](h
 GEMINI_API_KEY=your_key_here
 ```
 
-Run the engine's unit tests:
+Run the engine's unit tests — the pure logic in `lib/` (33 tests):
 
 ```bash
-node --test lib/speller/speller.test.mjs lib/predict/predict.test.mjs
+npm test
 ```
 
 ## Tech

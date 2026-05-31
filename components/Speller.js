@@ -2,14 +2,9 @@
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { icons } from "lucide-react";
-import { ScanMachine } from "@/lib/speller/machine.mjs";
-import { Editor } from "@/lib/speller/editor.mjs";
-import { buildRows, ROW_LABELS } from "@/lib/speller/layout.mjs";
-import { suggest } from "@/lib/predict/ondevice.mjs";
-import { geminiSuggest } from "@/lib/predict/gemini.mjs";
-import { personalSuggest, recordMessage } from "@/lib/predict/personal.mjs";
-import { dedupeByMeaning } from "@/lib/predict/dedupe.mjs";
-import { cues } from "@/lib/audio/cues.mjs";
+import { ScanMachine, Editor, buildRows, ROW_LABELS } from "@/lib/speller.mjs";
+import { suggest, geminiSuggest, personalSuggest, recordMessage, dedupeByMeaning } from "@/lib/predict.mjs";
+import { cues } from "@/lib/cues.mjs";
 
 // Merge predictions from several sources in priority order, drop ones that mean
 // the same thing (even if worded differently), and cap at 4.
