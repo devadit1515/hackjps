@@ -2,7 +2,7 @@
 
 Lines in quotes are what you actually say — say them like you talk. Italic lines are what to do on screen.
 
-**Time:** Problem 0:00–0:25 · Demo 0:25–1:55 · Code 1:55–2:50 · Close 2:50–3:00.
+**Time:** Problem ~20s · Demo ~80s · Code **~1:20** · Close ~5s. The code section is timed to your 1:20, which puts the whole video around 3:05 — trim a few seconds off the problem and demo if you need an exact 3:00.
 
 **Before you record**
 - Folder is named `aloud` ✓
@@ -50,27 +50,34 @@ Lines in quotes are what you actually say — say them like you talk. Italic lin
 
 ---
 
-## 3. The code (1:55 – 2:50)
+## 3. The code (~1 min 20s)
 
-*Switch to VS Code. Don't read code — open each file as you mention it. This is where you show you actually understand what you built, so practice it until it's smooth.*
+*Open VS Code and open each file as you name it — like a tour you've given a hundred times. This is ~80 seconds at a confident pace; if you run long, drop the calibration line (beat 3).*
 
-"It's a Next.js app, and I kept it small on purpose — one input, one output. All the real logic is seven files in `lib/`, with unit tests."
+"It's a Next.js app, one idea start to finish — one input, a blink, into one output, speech. The real logic's in seven small files in `lib/`, kept out of the UI so I can unit-test it — 33 tests on the core."
 *(open the `lib/` folder)*
 
-"The input is the eyes. `BlinkCam` runs MediaPipe's face model right in the browser and reads how shut my eyes are every frame. Holding past about half a second counts as one pick."
+"`BlinkCam` runs MediaPipe's face model on the GPU, in the browser — the camera feed never leaves the laptop. Every frame it reads how shut each eye is and takes the stronger one. I don't fire on a blink — that's too fast, you'd trigger it by accident — I fire on a half-second *hold*, so one hold is one clean pick."
 *(BlinkCam.js)*
 
-"Everyone's different, so `blink.mjs` calibrates per person — it samples your eyes open, then closed, and sets the cutoff in between."
+"A strong blinker and a faint one read totally differently, so `blink.mjs` tunes to each person in about six seconds — it samples your eyes open and closed, takes percentiles so one bad frame can't skew it, and sets the cutoff in the gap between them."
 *(blink.mjs)*
 
-"That one pick drives the scanning. On the boards it's the moving highlight; in the speller it's a two-level scan — it goes through the rows, you pick a row, then it goes through the letters. That's `speller.mjs`."
+"That pick drives the scanning. The boards step a highlight every 1.4 seconds; the speller's a two-level state machine — it scans the rows, you pick one, then it scans the letters inside it. It freezes the instant your eyes start to close, so the pick lands where the highlight actually was — and the letters never move, because when you're exhausted, predictable beats fast."
 *(speller.mjs)*
 
-"The hardest part is turning a few letters into a real sentence. `predict.mjs` combines three things — an instant offline model, a part that learns your own phrases, and an optional Gemini call for full sentences — then drops duplicates so you don't see the same idea twice."
+"The hardest part is turning a few letters into a real sentence — that's `predict.mjs`. It runs three predictors at once: an instant offline one with a word list and a word-pair table, one that learns the exact phrases you use and floats them to the top, and Gemini, which turns something like 'cold water' into a full, polite sentence. Then it drops anything more than sixty percent the same idea, and cancels the previous AI call on every keystroke so it stays instant."
 *(predict.mjs)*
 
-"`useSpeech` reads it out with the browser's speech API, and the Gemini key stays on the server in this one route — never in the browser. With no key, everything still works offline."
-*(useSpeech.js, then api/suggest/route.js)*
+"Then `useSpeech` reads it out and repeats it until I dismiss it — and the Gemini key lives only here, on the server, so with no key it just falls back to the offline model and the whole app runs with zero internet."
+*(useSpeech.js → api/suggest/route.js)*
+
+**Reserve — drop any of these in if you have a few seconds, or get asked. They prove you know the corners:**
+- "It fires on the *hold*, not on re-opening the eyes — so it still works for someone who can't fully open them again — and there's a lockout so one hold can't double-fire."
+- "The thresholds use hysteresis — it takes more to count as 'closed' than to count as 'open' again — so it never flickers between the two."
+- "The scan engine is a pure state machine with no UI inside it — that's how it's unit-tested; the 33 tests cover the machine, the text editor, the predictor, and the calibration math."
+- "Every row in the speller ends in a 'back' cell, so a wrong pick is never a dead end — and the editor auto-capitalizes and spaces the message for you."
+- "Gemini runs at low temperature with reasoning turned off and a strict JSON schema, so it's fast and always parseable — and it's the only thing that ever touches a server."
 
 ---
 
