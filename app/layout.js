@@ -2,6 +2,9 @@ import { Atkinson_Hyperlegible, Fraunces } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
+// Atkinson Hyperlegible was designed by the Braille Institute specifically to
+// improve legibility for low-vision readers — accessibility where it matters
+// (every control and word on the board).
 const atkinson = Atkinson_Hyperlegible({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -10,6 +13,8 @@ const atkinson = Atkinson_Hyperlegible({
   display: "swap",
 });
 
+// Fraunces — a soft, optical "luxury" serif — for the brand and the spoken
+// voice. The couture register; Atkinson stays for everything interactive.
 const fraunces = Fraunces({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
@@ -25,7 +30,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#FBF7F1",
+  themeColor: "#f3efe7",
   width: "device-width",
   initialScale: 1,
 };
