@@ -202,7 +202,7 @@ export default function Aloud() {
       ) : (
         <>
           <header className="top">
-            <div className="mark"><span className="dot" />Aloud</div>
+            <div className="mark">Aloud<span className="dot">.</span></div>
             <div className="top-actions">
               <span className="eye-status" data-on={camOn}>
                 <LIcon name="Eye" size={15} stroke={2} /> {camOn ? "Eye control on" : "Camera off"}

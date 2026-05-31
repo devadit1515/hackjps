@@ -1,23 +1,22 @@
-import { Atkinson_Hyperlegible, Fraunces } from "next/font/google";
+import { DM_Sans, DM_Serif_Display } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
-// Atkinson Hyperlegible was designed by the Braille Institute specifically to
-// improve legibility for low-vision readers — accessibility where it matters
-// (every control and word on the board).
-const atkinson = Atkinson_Hyperlegible({
+// DM Sans — the functional voice of the interface. Clean and highly legible at
+// small sizes for every key, control, and word on the board, even in a dim ICU.
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
   variable: "--font-main",
   display: "swap",
 });
 
-// Fraunces — a soft, optical "luxury" serif — for the brand and the spoken
-// voice. The couture register; Atkinson stays for everything interactive.
-const fraunces = Fraunces({
+// DM Serif Display — the emotional / brand register: the wordmark, screen
+// titles, and the spoken voice. Italic carries the tagline.
+const dmSerif = DM_Serif_Display({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400"],
   style: ["normal", "italic"],
   variable: "--font-display",
   display: "swap",
@@ -30,14 +29,14 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#0c1116",
+  themeColor: "#070B0F",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${atkinson.variable} ${fraunces.variable}`}>
+    <html lang="en" className={`${dmSans.variable} ${dmSerif.variable}`}>
       <body>{children}<Analytics /></body>
     </html>
   );
