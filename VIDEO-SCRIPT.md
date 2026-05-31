@@ -20,3 +20,6 @@
 
 **the rest** *(no need to open)*
 "`board.js` holds the preset phrases, `lexicon.mjs` is the offline word data, `cues.mjs` the audio cues, and `page.js` and `Speller.js` render the screens."
+
+**frontend & deployment** *(no need to open)*
+"The frontend is React with a hand-written CSS design system in `globals.css`, built for accessibility — the Atkinson Hyperlegible low-vision typeface, large scan targets, and a full keyboard fallback. The Gemini call runs in a serverless API route so the key never reaches the client, the core logic is covered by 33 unit tests, and it's deployed on Vercel, auto-deploying on every push to GitHub."
