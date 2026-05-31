@@ -366,6 +366,11 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .sp-cell.k-punct .sp-cap { font-size: clamp(17px, 2.4vh, 26px); }
 .sp-cell.k-suggestion { flex: 2 1 0; background: linear-gradient(180deg, #fff8ef, #f3e8d8); border-color: rgba(187, 87, 51, 0.18); }
 .sp-cell.k-suggestion .sp-cap { font-size: clamp(12px, 1.5vw, 16px); }
+/* AI-generated suggestion — a subtle gold mark so it's clear the AI composed it */
+.sp-cell.k-suggestion.ai { background: linear-gradient(180deg, #fdf5e6, #f4e7d0); border-color: rgba(196, 146, 46, 0.32); }
+.sp-cell .sp-ico.ai { color: #c0892c; }
+.sp-cell.k-suggestion.ai.on { border-color: var(--clay); }
+.sp-cell.k-suggestion.ai.on .sp-ico.ai { color: #9a6c1c; }
 .sp-cell.k-back { flex: 0 0 auto; min-width: clamp(54px, 7vw, 84px); color: var(--ink-soft); background: rgba(255, 255, 255, 0.45); border-style: dashed; }
 .sp-cell.k-recent { flex: 1 1 0; }
 .sp-cell.k-note { flex: 1 1 0; background: none; border-style: dashed; color: var(--ink-faint); box-shadow: none; }

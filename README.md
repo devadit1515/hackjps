@@ -39,22 +39,27 @@ When the right sentence isn't on a board, **Spell it out** composes any message,
 - **Predictions do the work.** A live suggestions row sits **first** (fastest to reach): on-device word-completion, next-word prediction, and whole-phrase matches appear instantly and offline; when a free Gemini key is present, smarter full-sentence completions are merged in. Accepting one inserts the whole word/sentence with **automatic spacing and capitalization**.
 - **Forgiving & safe.** Backspace a letter or word, one-level undo, a **confirmed** clear (two selections, so a stray blink can't wipe the message), a **Rest** mode that pauses scanning so the user can close their eyes, re-sayable **recent** messages, and an always-present **🔔 Call for help** that flashes the screen and loudly loops a help message — because the user may be alone.
 
-## How it works
+## How it works — AI from input to output
+
+Aloud is AI end-to-end: a neural network reads the eyes, generative AI turns a few selections into fluent speech, and the system adapts to each person.
 
 | Layer | Technology |
 | --- | --- |
-| Hands-free input | **MediaPipe FaceLandmarker** (on-device neural network) reads facial blendshapes every frame to detect a deliberate long blink |
-| Selection | **Single-switch auto-scanning** (one level for boards, two for the speller) — an established AAC access method — with the scan frozen mid-blink so a selection lands on the option the highlight was resting on |
-| Prediction | An **on-device predictor** (frequency word-completion + a small next-word n-gram + AAC phrase matching) suggests instantly and offline; an optional **Google Gemini** route upgrades it to full-sentence completions |
-| Speech | The browser's **Web Speech API** speaks each message aloud, looping until dismissed |
+| **Vision AI (input)** | **MediaPipe FaceLandmarker** — an on-device neural network — reads facial blendshapes every frame to detect a deliberate blink. This *is* the interface for someone who can't move their hands. |
+| **Adaptive calibration** | A quick per-user "eyes open → eyes closed" sample places the detection thresholds in the gap between the two, so a strong or faint blinker both work — the model tunes itself to each face and lighting. |
+| Selection | **Single-switch auto-scanning** (one level for boards, two for the speller) — an established AAC access method — with the scan frozen mid-blink so a selection lands where the highlight was resting. |
+| **Generative AI (composition)** | In "Spell it out", **Google Gemini** turns sparse, keyword-style input into complete natural sentences (*"cold water" → "Could I please have some cold water?"*) — AI does the typing's heavy lifting, marked with ✨ in the suggestions. Degrades to an instant on-device predictor (word-completion + next-word n-gram + phrase matching) with no key, fully offline. |
+| **On-device personalization** | A tiny adaptive model learns the words and whole messages this person actually says and surfaces them first next time — online learning that stays on the device. |
+| Speech (output) | The browser's **Web Speech API** speaks each message aloud, looping until dismissed. |
 
-The pure logic — the scan state machine, the editor, and the predictor — lives in framework-free modules under `lib/` and is covered by `node --test` unit tests.
+The pure logic — the scan state machine, the editor, the predictor, the personalization, and the calibration math — lives in framework-free modules under `lib/` and is covered by `node --test` unit tests.
 
 ### AI / ML disclosure (HackJPS)
 
-- **Machine learning is the interface.** MediaPipe FaceLandmarker (a neural network) runs entirely on-device to power the blink control — it's the *only* way a user without hand movement operates the whole app. The ML isn't a feature bolted on; it *is* how Aloud is used.
-- **AI does the typing's heavy lifting.** In "Spell it out", on-device prediction (and optionally Gemini) collapses a sentence into a few selections.
-- **Works fully offline; private by default.** Vision, prediction, and voice all run in the browser with no key. The optional Gemini key lives only on the server and merely sharpens suggestions — the app never depends on the network.
+- **ML is the interface, not a feature.** The MediaPipe neural network is the *only* way a user without hand movement operates the whole app — and it tunes its thresholds to each individual.
+- **Generative AI does the hardest part:** collapsing a few eye-selected keywords into a fluent, ready-to-speak sentence — directly attacking the fatigue that makes existing tools unusable.
+- **It also learns the person** over time, on-device, so the people they love and the things they need rise to the top.
+- **Private by default:** vision, on-device prediction, personalization, and voice all run in the browser. The Gemini key lives only on the server; with no key the app still works fully offline.
 - This README and the design were written by the author; AI coding tools assisted with implementation.
 
 ## Accessibility by design

@@ -20,12 +20,13 @@ export async function POST(request) {
     const res = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents:
-        `A person who can only move their eyes is composing a message letter by letter ` +
-        `and has typed so far:\n"${text}"\n\n` +
-        `Suggest up to 4 short, natural ways they are most likely trying to finish the ` +
-        `WHOLE message. Each must be a complete, ready-to-speak sentence in their own ` +
-        `first-person voice, prioritising everyday care and communication needs. ` +
-        `Keep them distinct and brief.`,
+        `A person who can only move their eyes is composing a message a few letters or ` +
+        `words at a time and has entered so far:\n"${text}"\n\n` +
+        `This may be terse or keyword-style (e.g. "cold water" → "Could I please have ` +
+        `some cold water?"). Reply with up to 4 short, COMPLETE, natural first-person ` +
+        `sentences they most likely want to SAY out loud — turning sparse input into ` +
+        `fluent speech, not merely predicting the next word. Prioritise everyday care ` +
+        `and communication needs, and keep each distinct and brief.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: { type: Type.ARRAY, items: { type: Type.STRING } },

@@ -7,7 +7,22 @@ import { Editor } from "@/lib/speller/editor.mjs";
 import { buildRows, ROW_LABELS } from "@/lib/speller/layout.mjs";
 import { suggest } from "@/lib/predict/ondevice.mjs";
 import { geminiSuggest } from "@/lib/predict/gemini.mjs";
+import { personalSuggest, recordMessage } from "@/lib/predict/personal.mjs";
 import { cues } from "@/lib/audio/cues.mjs";
+
+// Merge predictions from several sources, de-duplicated, capped at 4.
+function mergeSuggestions(...lists) {
+  const out = [], seen = new Set();
+  for (const list of lists) {
+    for (const s of list || []) {
+      const k = (s.text || "").trim().toLowerCase();
+      if (!s.label || !k || seen.has(k)) continue;
+      seen.add(k); out.push(s);
+      if (out.length >= 4) return out;
+    }
+  }
+  return out;
+}
 
 function LIcon({ name, size = 22, stroke = 1.75 }) {
   const Cmp = icons[name] || icons.Circle;
@@ -50,22 +65,20 @@ const Speller = forwardRef(function Speller(
 
   /* ---------- predictions: on-device instantly, Gemini upgrades when reachable ---------- */
   const refreshSuggestions = useCallback((t) => {
+    // instant, offline: what this person tends to say + the on-device model
+    const personal = personalSuggest(t, 2);
     const base = suggest(t, 4);
-    setSuggestions(base);
+    setSuggestions(mergeSuggestions(personal, base));
     if (abortRef.current) abortRef.current.abort();
     if (!t.trim()) return;
+    // generative upgrade: AI turns sparse input into full sentences (when a key is set)
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     const id = setTimeout(async () => {
       const g = await geminiSuggest(t, { signal: ctrl.signal });
       if (!g || ctrl.signal.aborted) return;
-      const merged = [];
-      const seen = new Set();
-      const add = (s) => { const k = s.text.trim().toLowerCase(); if (s.label && !seen.has(k)) { seen.add(k); merged.push(s); } };
-      g.slice(0, 2).forEach(add);
-      base.forEach(add);
-      g.slice(2).forEach(add);
-      setSuggestions(merged.slice(0, 4));
+      // AI first (the showcase), then a learned phrase, then the on-device fill
+      setSuggestions(mergeSuggestions(g.slice(0, 2), personal.slice(0, 1), base, g.slice(2)));
     }, 280);
     ctrl.signal.addEventListener("abort", () => clearTimeout(id));
   }, []);
@@ -106,6 +119,7 @@ const Speller = forwardRef(function Speller(
     const s = (t || "").trim();
     if (!s) return;
     onSpoke?.(s);
+    recordMessage(s); // the model learns what this person actually says
     startAnnounce(s, { returnTo: "spell" });
   }, [onSpoke, startAnnounce]);
 
@@ -115,6 +129,7 @@ const Speller = forwardRef(function Speller(
     const t = editorRef.current.text.trim();
     if (!t) return;
     onSpoke?.(t);
+    recordMessage(t);
     startAnnounce(t, { returnTo: "home" });
   }, [onSpoke, startAnnounce]);
   const doCall = useCallback(() => {
@@ -228,6 +243,7 @@ const Speller = forwardRef(function Speller(
       "k-" + cell.kind,
       focused ? "on" : "",
       cell.urgent ? "urgent" : "",
+      cell.ai ? "ai" : "",
       isClearCell && clearArmed ? "armed" : "",
     ].join(" ");
     return (
@@ -236,9 +252,11 @@ const Speller = forwardRef(function Speller(
         className={cls}
         onMouseEnter={() => moveTo(r, c)}
         onClick={() => directSelect(r, c, cell)}
-        aria-label={cell.label}
+        aria-label={cell.ai ? "AI suggestion: " + cell.label : cell.label}
       >
-        {cell.icon && cell.kind !== "letter" && cell.kind !== "space" && <span className="sp-ico"><LIcon name={cell.icon} size={cell.kind === "suggestion" ? 16 : 19} /></span>}
+        {cell.ai
+          ? <span className="sp-ico ai"><LIcon name="Sparkles" size={15} /></span>
+          : cell.icon && cell.kind !== "letter" && cell.kind !== "space" && <span className="sp-ico"><LIcon name={cell.icon} size={cell.kind === "suggestion" ? 16 : 19} /></span>}
         <span className="sp-cap">{cell.kind === "space" ? "␣ space" : label}</span>
       </button>
     );
