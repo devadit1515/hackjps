@@ -1,22 +1,22 @@
 # Aloud — code walkthrough
 
 **`lib/`** *(open the folder)*
-"It's built with Next.js, MediaPipe for reading the blinks, Gemini for the sentence suggestions, and the browser's speech API for the voice. The whole thing is one idea — a blink goes in, speech comes out — and all the real logic is in these files."
+"Built with Next.js and React. MediaPipe handles the eye input, Gemini generates the sentence suggestions, and the Web Speech API handles output. The core logic is in these files."
 
 **`components/BlinkCam.js`**
-"This watches your eyes — it's MediaPipe's face model, running in the browser so the webcam never leaves the laptop. I can't react to a blink, everyone blinks constantly, so I wait for you to hold your eyes shut about half a second, and that's a click."
+"Runs MediaPipe's FaceLandmarker on the webcam feed in the browser, reading the eye-blink blendshape every frame. A selection fires when the eyes stay shut past about 500 milliseconds, which filters out normal involuntary blinks."
 
 **`lib/blink.mjs`**
-"This calibrates the blink to each person in about six seconds, since everyone's eyes and lighting are different."
+"Calibrates the blink threshold per user by sampling open- and closed-eye values and setting the cutoff between them."
 
 **`lib/speller.mjs`**
-"This runs the scanning — a state machine that goes row by row: you pick a row, then it goes letter by letter. It freezes the second your eyes start to close, so you land on what you were actually looking at, and the letters never move around."
+"A two-level scan state machine: it scans the rows, selecting one drops into that row, then it scans that row's letters. Scanning pauses while the eyes are closed, and the letter layout stays fixed."
 
 **`lib/predict.mjs`**
-"This turns a few letters into a full sentence. Three things run at once: a fast offline guesser, one that learns the phrases you use most, and Gemini, which takes 'cold water' and writes back 'could I please have some cold water.' Then it strips out the duplicates so you don't see the same sentence twice."
+"Builds suggestions from three sources — an offline word and phrase predictor, a personalization model trained on the user's own phrases, and a Gemini call that expands partial input into full sentences — then deduplicates them by meaning."
 
 **`lib/useSpeech.js`**
-"And this reads the message out loud, and repeats it until they stop it."
+"Wraps the Web Speech API: synthesizes the message and repeats it until dismissed."
 
 **the rest** *(no need to open)*
-"Everything else is supporting — `board.js` holds the ready-made phrases, `lexicon.mjs` is the offline word data, `cues.mjs` is the small confirmation sounds, and `page.js` and `Speller.js` are the screens themselves."
+"`board.js` holds the preset phrases, `lexicon.mjs` is the offline word data, `cues.mjs` the audio cues, and `page.js` and `Speller.js` render the screens."
