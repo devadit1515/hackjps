@@ -167,10 +167,18 @@ export default function Aloud() {
       isDwell ? "dwell" : "",
       extraClass || "",
     ].join(" ");
+
+    // data-cat gives each board its own accent: the home tiles by id, the spell
+    // tile its plum, and word tiles inherit the colour of the board they sit in.
+    const catKey =
+      item.id ||
+      (item.type === "spell" ? "spell" : (view !== "home" && item.type === "say" ? view : undefined));
+
     return (
       <button
         key={item.key}
         className={cls}
+        data-cat={catKey}
         onMouseEnter={() => { setFocusIdx(idx); setHovering(true); }}
         onMouseLeave={() => { setHovering(false); setDwellLocked(false); }}
         onClick={() => select(item)}
@@ -213,7 +221,7 @@ export default function Aloud() {
             </div>
           </header>
 
-          <main className="canvas">
+          <main className="canvas" data-board={view}>
             <span className="crumb">{crumb}</span>
             <div className="choices" data-cols={cols}>
               {primary.map((it) => renderChoice(it))}
