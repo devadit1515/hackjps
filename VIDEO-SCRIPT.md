@@ -8,15 +8,15 @@
 
 | Segment | Time | Length | What's on screen |
 | --- | --- | --- | --- |
-| **1. The problem** | 0:00 – 0:30 | 30s | You to camera / simple title |
-| **2. Product + live demo** | 0:30 – 1:50 | 80s | The live app (aloud-pink.vercel.app) |
-| **3. The code** | 1:50 – 2:50 | 60s | VS Code (the `aloud` folder) |
+| **1. The problem** | 0:00 – 0:25 | 25s | You to camera / simple title |
+| **2. Product + live demo** | 0:25 – 1:55 | 90s | The live app (aloud-pink.vercel.app) |
+| **3. The code** | 1:55 – 2:50 | 55s | VS Code (the `aloud` folder) |
 | **4. Close** | 2:50 – 3:00 | 10s | Back to the app |
 
-This keeps your 2-minute "problem + product" half (0:00–1:50) and your 1-minute "code" half (1:50–3:00) — the demo is the star, empathy comes first, and the code minute is scripted word-for-word below.
+The **demo is the star**, so it gets the extra time — ≈90s, about 10s longer than before. The problem stays a punchy 25s and the code is the final ~55s. Empathy first, the live demo carries the middle, the code is scripted word-for-word below. *(Want the full +15s on the demo instead? Trim the problem to 0:20 and start the demo at 0:20.)*
 
 ### Pre-flight checklist (do these before recording)
-- [ ] **Rename the folder to `aloud`** — in the VS Code Explorer, right-click the `alibi` folder → **Rename** → type `aloud`. (VS Code does this cleanly even though the OS lock blocks a terminal rename.)
+- [x] **Folder is named `aloud`** — done (matches the app name on screen).
 - [ ] **Bump VS Code font size** (Ctrl + `=` a few times) so code is legible on video; collapse the terminal.
 - [ ] Use the **live site** for the demo so the **AI suggestions work** (the Gemini key is set on Vercel). Keep `npm run dev` as a backup.
 - [ ] Silence notifications, close stray tabs, test mic + screen recorder, record at 1080p.
@@ -24,7 +24,7 @@ This keeps your 2-minute "problem + product" half (0:00–1:50) and your 1-minut
 
 ---
 
-## Segment 1 — The problem (0:00 – 0:30)
+## Segment 1 — The problem (0:00 – 0:25)
 
 **[SAY]** *(calm, human, unhurried)*
 > "Imagine being completely awake — every thought, every feeling intact — but unable to move, speak, or even nod. For people with ALS, locked-in syndrome, or advanced cerebral palsy, that's everyday life. They have urgent things to say — *I'm in pain*, *I love you* — and no way to say them. The tools that exist are slow, expensive, and exhausting — many make you spell out every single letter, sometimes in Morse code."
@@ -33,32 +33,50 @@ This keeps your 2-minute "problem + product" half (0:00–1:50) and your 1-minut
 
 ---
 
-## Segment 2 — Product + live demo (0:30 – 1:50)
+## Segment 2 — Product + live demo (0:25 – 1:55)  ← *the star: run it on the live site so the AI works*
 
-**Beat A — what it is (0:30–0:50)**
+> Drive it with your eyes if you can; if blinking on camera is fiddly, press **Space** to select and tell them *the blink is the real switch*. **Golden rule: let every spoken sentence finish before you talk again** — the silence is what sells it.
+
+**Beat A — In control in six seconds (0:25 – 0:42)**
 **[SAY]**
-> "So I built **Aloud** — a voice for anyone who can speak only with their eyes. It needs one reliable movement: a blink. A helper taps the camera on once — and from then on, the person controls everything themselves, and Aloud speaks for them, out loud, in full sentences."
+> "This is Aloud. A helper taps the camera on once — and from this moment, everything here is mine to control with one movement: a blink. First, it tunes itself to my eyes and my lighting…"
 
-**[SHOW]** The intro screen → click **Begin with eye control**. Mention: *"It tunes the blink detection to my eyes and lighting in about six seconds."*
+**[SHOW]** Intro screen → click **Begin with eye control** → the quick calibration runs (*keep your eyes open* → *now close your eyes* → **All set**) → the home board appears. *Don't cut the ~6-second calibration — a system that adapts itself to each person is part of the wow.*
 
-**Beat B — the core magic: scan → blink → speech (0:50–1:20)**
+**Beat B — One blink, a real voice (0:42 – 1:08)**  ← *the emotional peak; do not rush this*
 **[SAY]**
-> "Here's the whole interface. The highlight moves across the choices **on its own** — nothing to aim at, nothing to press. When it lands on what I want, I just **hold my eyes shut** for a moment…"
+> "Now watch the whole interface. The highlight moves through the choices **on its own** — I don't aim, I don't reach, I don't press. When it lands on what I need… I just close my eyes, and hold."
 
-**[SHOW]** On the home board, let the highlight scan, then long-blink **I feel → in pain**. Let the full-screen **"I'm in pain."** speak aloud — **pause and let it breathe.** This is the emotional peak.
-> *(If blinking on camera is awkward, press **Space** to select — the blink is the real input; the keyboard is just the fallback.)*
+**[SHOW]** Let the highlight auto-scan the home board → land on **I feel** → long-blink → it opens → scan to **in pain** → long-blink → the screen fills with **"I'm in pain,"** spoken aloud in a real voice.
+**[PAUSE — two full seconds of silence. Let it speak. This is the entire point of the project.]**
+**[SAY]** *(quietly, once it finishes)*
+> "A whole sentence. A real voice. From a single blink — no typing, no spelling, no Morse code."
 
-**Beat C — the AI (1:20–1:50)**
+**Beat C — Not just survival (1:08 – 1:25)**  ← *the beat that wins hearts*
 **[SAY]**
-> "And when the sentence I need isn't ready-made, I can spell anything — but I almost never type it all. Watch: I pick just a few letters, and **AI turns them into full, natural sentences** to choose from."
+> "And it isn't only emergencies. When you lose your voice, the hardest thing to lose isn't asking for water — it's everyone you can no longer reach."
 
-**[SHOW]** Open **Spell it out**, pick a few letters (e.g. `c o l d  w`), let the ✨ AI suggestions appear → choose **"Could I please have some cold water?"** → it speaks.
+**[SHOW]** Long-blink back home → scan to **People** (the whole board shifts to green) → open it → land on **I love you** → long-blink → **"I love you."** speaks. **[PAUSE — let it land.]**
+
+**Beat D — A few letters become a sentence (1:25 – 1:46)**  ← *the technical wow judges remember*
 **[SAY]**
-> "It even **learns the words and phrases I use most** — and it works **fully offline** if there's no internet. The AI is an upgrade, not a crutch."
+> "When the words aren't ready-made, I can spell anything — but I almost never type the whole thing. Watch: I choose just a few letters…"
+
+**[SHOW]** Open **Spell it out** → pick a handful of letters (e.g. `c o l d  w`) → the **✨ AI suggestions** appear in the top row.
+**[SAY]**
+> "…and the AI reads those fragments and writes the full, natural sentence I was reaching for."
+
+**[SHOW]** Choose the ✨ suggestion → it speaks something like **"Could I please have some cold water?"**
+
+**Beat E — Learns you, guards you, needs no internet (1:46 – 1:55)**
+**[SAY]**
+> "It learns the words I use most, so they rise to the top over time. There's always a one-blink **call for help**, because they may be alone. And every bit of this runs on the laptop — my face never leaves the device, and it works with no internet at all. The AI is an upgrade, never a crutch."
+
+**[SHOW]** Gesture to the learned suggestions and the red **call for help** action; if it's easy, drop Wi-Fi for a second to show a board still speaks.
 
 ---
 
-## Segment 3 — The code (1:50 – 2:50)  ← *the memorized minute*
+## Segment 3 — The code (1:55 – 2:50)  ← *the memorized ~55 seconds*
 
 Switch to **VS Code**. Don't read code line-by-line — **point at files and tell the story.** Click each file as you reach it.
 
