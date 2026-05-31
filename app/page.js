@@ -6,6 +6,7 @@ import { icons } from "lucide-react";
 import { CATEGORIES, WORDS } from "@/lib/board";
 import { useSpeech } from "@/lib/useSpeech";
 import Speller from "@/components/Speller";
+import Threshold from "@/components/threshold/Threshold";
 
 const BlinkCam = dynamic(() => import("@/components/BlinkCam"), { ssr: false });
 
@@ -142,7 +143,7 @@ export default function Aloud() {
   /* ============================================================ */
   if (!started) {
     return (
-      <Intro
+      <Threshold
         onBegin={() => {
           setStarted(true);
           setCamOn(true); // eye control is the only mode — request the camera immediately
@@ -266,38 +267,6 @@ function Announce({ data, speaking, onDone }) {
       <span className="a-hint">When you&apos;re okay again, just hold your eyes shut for a moment — or look at <b>I got help</b> and long-blink.</span>
     </div>
   );
-}
-
-function Intro({ onBegin }) {
-  const [dwell, setDwell] = useState(false);
-  return (
-    <div className="intro">
-      <h1 className="i-mark">Aloud<span className="dot">.</span></h1>
-      <p className="i-sub">A voice for anyone who can speak only with their eyes.</p>
-      <div className="i-go">
-        <button
-          className="begin"
-          onMouseEnter={() => setDwell(true)}
-          onMouseLeave={() => setDwell(false)}
-          onClick={onBegin}
-        >
-          Begin with eye control
-          {dwell && <span className="dwell-bar" onAnimationEnd={onBegin} />}
-        </button>
-        <span className="i-hint">A helper taps once to turn on the camera. After that the highlight moves through the choices on its own — when it lands on what you want, <b>hold your eyes shut for a moment</b> to choose.</span>
-      </div>
-      <KeyStart onBegin={onBegin} />
-    </div>
-  );
-}
-
-function KeyStart({ onBegin }) {
-  useEffect(() => {
-    const f = () => onBegin();
-    window.addEventListener("keydown", f, { once: true });
-    return () => window.removeEventListener("keydown", f);
-  }, [onBegin]);
-  return null;
 }
 
 function HelpSheet({ onClose, onRecalibrate }) {
