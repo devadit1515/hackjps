@@ -60,7 +60,6 @@ The pure logic — the scan state machine, the editor, the predictor, the person
 - **Generative AI does the hardest part:** collapsing a few eye-selected keywords into a fluent, ready-to-speak sentence — directly attacking the fatigue that makes existing tools unusable.
 - **It also learns the person** over time, on-device, so the people they love and the things they need rise to the top.
 - **Private by default:** vision, on-device prediction, personalization, and voice all run in the browser. The Gemini key lives only on the server; with no key the app still works fully offline.
-- This README and the design were written by the author; AI coding tools assisted with implementation.
 
 ## Architecture — how the code is organized
 

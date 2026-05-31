@@ -1,16 +1,10 @@
-/* ============================================================
-   ALOUD — Light editorial minimalism.
-   Warm paper · ink · a single clay accent. Built for eyes.
-   Nothing on screen that doesn't earn its place.
-   ============================================================ */
-
 :root {
-  --paper: #f3efe7;        /* warm bone canvas */
-  --paper-lift: #fbf8f2;   /* lifted surface */
-  --ink: #211c16;          /* warm near-black */
-  --ink-soft: #6a6256;     /* secondary text */
-  --ink-faint: #a59c8d;    /* tertiary / placeholder */
-  --clay: #bb5733;         /* the one accent */
+  --paper: #f3efe7;
+  --paper-lift: #fbf8f2;
+  --ink: #211c16;
+  --ink-soft: #6a6256;
+  --ink-faint: #a59c8d;
+  --clay: #bb5733;
   --clay-deep: #97431f;
   --clay-wash: rgba(187, 87, 51, 0.10);
   --line: rgba(33, 28, 22, 0.10);
@@ -38,8 +32,7 @@ body {
   overflow: hidden;
 }
 
-/* a soft, slowly-drifting wash of light — warm centre, faint colour in the corners.
-   Quiet enough to stay "editorial", alive enough that the page never feels flat. */
+
 body::before {
   content: ""; position: fixed; inset: -12%; z-index: 0; pointer-events: none;
   background:
@@ -54,7 +47,7 @@ body::before {
   from { transform: translate3d(0, 0, 0) scale(1); }
   to   { transform: translate3d(-2.2%, -1.6%, 0) scale(1.06); }
 }
-/* faint paper grain for tactility */
+
 body::after {
   content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.5;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
@@ -65,9 +58,7 @@ body::after {
 button { font-family: inherit; cursor: pointer; color: inherit; background: none; border: none; }
 :focus-visible { outline: 2px solid var(--clay); outline-offset: 4px; }
 
-/* ============================================================
-   Shell
-   ============================================================ */
+
 .app-light { position: relative; z-index: 1; height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
 
 .top {
@@ -87,12 +78,10 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .eye-status { display: inline-flex; align-items: center; gap: 7px; font-family: var(--main); font-size: 13px; font-weight: 700; color: var(--ink-faint); padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line); }
 .eye-status[data-on="true"] { color: var(--clay); border-color: rgba(187,87,51,0.32); background: var(--clay-wash); }
 
-/* ============================================================
-   The canvas — generous, centred, mostly empty
-   ============================================================ */
+
 .canvas { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(12px, 2.3vh, 28px); padding: clamp(8px, 2vh, 24px) clamp(22px, 5vw, 64px); width: 100%; max-width: 1180px; margin: 0 auto; }
 
-/* the spoken voice — the hero */
+
 .voice { text-align: center; min-height: 1.2em; display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .voice .eyebrow { font-family: var(--main); font-size: 12px; font-weight: 700; letter-spacing: 0.34em; text-transform: uppercase; color: var(--ink-faint); }
 .voice-line { font-family: var(--display); font-weight: 300; font-size: clamp(34px, 6.4vw, 76px); line-height: 1.12; letter-spacing: -0.01em; color: var(--ink); max-width: 18ch; transition: opacity 0.4s; }
@@ -101,16 +90,14 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .voice.speaking .voice-line { animation: breathe 2.4s ease-in-out infinite; }
 @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.74; } }
 
-/* trail of chosen words */
+
 .trail { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 26px; }
 .trail .tw { font-family: var(--main); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; color: var(--clay); padding: 6px 13px; border-radius: 999px; background: var(--clay-wash); animation: rise 0.3s var(--ease); }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ============================================================
-   Choices — few, large, calm
-   ============================================================ */
+
 .crumb { font-family: var(--main); font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); transition: color 0.4s var(--ease); }
-/* the breadcrumb takes on the colour of the board you're in */
+
 .canvas[data-board="feel"]   .crumb { color: #a9491f; }
 .canvas[data-board="need"]   .crumb { color: #8a5f12; }
 .canvas[data-board="people"] .crumb { color: #456a4f; }
@@ -122,7 +109,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .choices[data-cols="4"] { grid-template-columns: repeat(4, 1fr); max-width: 1020px; }
 
 .choice {
-  /* per-tile accent — defaults to clay, overridden by [data-cat] below */
+
   --c: var(--clay); --c-deep: var(--clay-deep); --c-1: 187,87,51;
   position: relative; overflow: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 1.6vh, 18px);
@@ -134,14 +121,14 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
   animation: choiceIn 0.6s var(--ease) backwards;
 }
 
-/* a small family of warm, light-friendly hues — one identity per board */
+
 .choice[data-cat="feel"]   { --c: #bb5733; --c-deep: #97431f; --c-1: 187,87,51; }
 .choice[data-cat="need"]   { --c: #b8801f; --c-deep: #8a5f12; --c-1: 184,128,31; }
 .choice[data-cat="people"] { --c: #5f8b6a; --c-deep: #456a4f; --c-1: 95,139,106; }
 .choice[data-cat="answer"] { --c: #5a7d99; --c-deep: #436076; --c-1: 90,125,153; }
 .choice[data-cat="spell"]  { --c: #8a6a8e; --c-deep: #674e6b; --c-1: 138,106,142; }
 
-/* a quick sweep of light as the scanner lands — the "cool" micro-moment */
+
 .choice::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3;
   background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.42) 50%, transparent 62%);
@@ -168,12 +155,12 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .choice.focus:not(.sub) .c-ico { transform: scale(1.1) translateY(-1px); background: radial-gradient(circle at 50% 30%, rgba(var(--c-1),0.30), rgba(var(--c-1),0.10)); color: var(--c-deep); }
 .choice.focus .c-label { color: var(--c-deep); }
 
-/* dwell fill */
+
 .dwell-bar { position: absolute; left: 0; bottom: 0; height: 5px; width: 0; background: linear-gradient(90deg, var(--c-deep), var(--c)); z-index: 4; }
 .choice.dwell .dwell-bar { animation: dwell var(--dwell-ms) linear forwards; }
 @keyframes dwell { from { width: 0; } to { width: 100%; } }
 
-/* special choices */
+
 .choice.ghost { background: rgba(255,255,255,0.4); border-style: dashed; border-color: var(--line-2); box-shadow: none; }
 .choice.ghost .c-label { color: var(--ink-soft); }
 .choice.accent { background: linear-gradient(180deg, #cc6c46, var(--clay)); border-color: var(--clay-deep); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 16px 34px -16px rgba(187,87,51,0.75); }
@@ -184,7 +171,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .choice.urgent { border-color: rgba(187,87,51,0.4); }
 .choice.urgent .c-ico { color: var(--clay); }
 
-/* secondary actions */
+
 .sub-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
 .choice.sub { flex-direction: row; min-height: 0; padding: 13px 22px; gap: 10px; border-radius: 999px; animation: none; }
 .choice.sub .c-ico { color: var(--clay); line-height: 0; display: inline-grid; place-items: center; }
@@ -201,19 +188,15 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
   .intro .i-mark .dot { animation: none; }
 }
 
-/* ============================================================
-   Footer hint
-   ============================================================ */
+
 .hint { text-align: center; padding: clamp(14px, 3vw, 26px); font-family: var(--main); font-size: 14px; color: var(--ink-faint); display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
 .hint .live { width: 7px; height: 7px; border-radius: 50%; background: var(--clay); box-shadow: 0 0 0 0 var(--clay-wash); animation: pulse 1.8s ease-out infinite; }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(187,87,51,0.35); } 100% { box-shadow: 0 0 0 12px rgba(187,87,51,0); } }
 .hint kbd { font-family: var(--main); font-weight: 700; font-size: 12px; padding: 2px 8px; border-radius: 6px; border: 1px solid var(--line-2); color: var(--ink-soft); }
 
-/* ============================================================
-   Onboarding — the "new world" moment
-   ============================================================ */
+
 .intro { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; gap: 30px; }
-/* a warm halo that breathes behind the wordmark */
+
 .intro::before {
   content: ""; position: absolute; z-index: -1; left: 50%; top: 40%; transform: translate(-50%, -50%);
   width: min(64vw, 640px); aspect-ratio: 1; border-radius: 50%; pointer-events: none;
@@ -239,9 +222,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .intro .i-hint b { color: var(--ink-soft); }
 @keyframes revealUp { from { opacity: 0; transform: translateY(22px); filter: blur(6px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
 
-/* ============================================================
-   Camera bubble (eyes)
-   ============================================================ */
+
 .cam-bubble { position: fixed; bottom: 22px; right: 22px; z-index: 40; width: 158px; border-radius: 16px; overflow: hidden; background: #1a1712; border: 1px solid var(--line-2); box-shadow: 0 18px 40px -20px rgba(33, 28, 22, 0.6); }
 .cam-bubble video { width: 100%; display: block; transform: scaleX(-1); filter: grayscale(0.3) contrast(1.05); }
 .cam-bubble .cam-state { position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 11px; font-family: var(--main); font-size: 11px; font-weight: 700; color: #f3efe7; display: flex; align-items: center; gap: 7px; background: linear-gradient(transparent, rgba(0,0,0,0.7)); }
@@ -250,7 +231,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .cam-bubble.blinking { border-color: var(--clay); box-shadow: 0 0 0 2px var(--clay); }
 .cam-bubble .eyemeter { position: absolute; top: 8px; left: 8px; right: 8px; height: 3px; border-radius: 3px; background: rgba(255,255,255,0.18); overflow: hidden; }
 .cam-bubble .eyemeter i { display: block; height: 100%; background: var(--clay); width: 0%; transition: width 0.06s linear; }
-/* dwell-to-select progress: fills as the eyes are held shut */
+
 .cam-bubble .cam-hold { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.14); }
 .cam-bubble .cam-hold i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--clay), #e08a5c); transition: width 0.05s linear; }
 .cam-bubble.blinking { border-color: var(--clay); box-shadow: 0 0 0 2px var(--clay); }
@@ -260,9 +241,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .cam-bubble .gaze-arrow { position: absolute; inset: 0; display: grid; place-items: center; font-size: 46px; color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,0.6); animation: arrowpop 0.18s var(--spring); }
 @keyframes arrowpop { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
 
-/* ============================================================
-   Overlay (help)
-   ============================================================ */
+
 .overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(243, 239, 231, 0.72); backdrop-filter: blur(8px); }
 .sheet { max-width: 560px; width: 100%; background: var(--paper-lift); border: 1px solid var(--line); border-radius: 24px; padding: clamp(28px, 4vw, 44px); box-shadow: 0 40px 90px -40px rgba(33, 28, 22, 0.55); }
 .sheet h2 { font-family: var(--display); font-weight: 400; font-size: clamp(26px, 4vw, 36px); margin-bottom: 10px; }
@@ -277,9 +256,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .recal { font-family: var(--main); font-weight: 700; font-size: 14px; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 8px; padding: 13px 20px; border-radius: 999px; border: 1px solid var(--line-2); transition: color .2s, border-color .2s; }
 .recal:hover { color: var(--clay); border-color: rgba(187,87,51,.4); }
 
-/* ============================================================
-   Calibration overlay — tune blinking to this user, once
-   ============================================================ */
+
 .calib { position: fixed; inset: 0; z-index: 95; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; background: rgba(243,239,231,0.93); backdrop-filter: blur(12px); animation: announceIn 0.4s var(--ease); }
 .calib-card { display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 32ch; }
 .calib-card h2 { font-family: var(--display); font-weight: 400; font-size: clamp(28px, 5vw, 46px); color: var(--ink); line-height: 1.05; }
@@ -300,9 +277,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 
 .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 60; font-family: var(--main); font-weight: 700; font-size: 14px; color: var(--paper-lift); background: var(--ink); padding: 13px 22px; border-radius: 999px; box-shadow: 0 18px 40px -20px rgba(0,0,0,0.5); }
 
-/* ============================================================
-   Announce — full-screen, bold, looping until Done
-   ============================================================ */
+
 .announce {
   position: fixed; inset: 0; z-index: 80; overflow: hidden; display: flex; flex-direction: column;
   align-items: center; justify-content: center; text-align: center; gap: clamp(18px, 3.5vh, 44px);
@@ -335,7 +310,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
   .choices[data-cols="3"], .choices[data-cols="4"] { grid-template-columns: repeat(2, 1fr); }
   .cam-bubble { width: 120px; }
 }
-/* short viewports: compress so nothing ever needs scrolling */
+
 @media (max-height: 720px) {
   .top { padding-top: 12px; padding-bottom: 12px; }
   .crumb { font-size: 12px; }
@@ -345,9 +320,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
   .sub-actions .choice.sub { padding: 9px 16px; }
 }
 
-/* ============================================================
-   "Spell it out" — the home tile (wide, distinct: an action, not a phrase)
-   ============================================================ */
+
 .choice.wide { grid-column: 1 / -1; }
 .choice.spell-tile {
   display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto;
@@ -360,9 +333,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .choice.spell-tile .c-sub { grid-column: 2; align-self: start; }
 .c-sub { font-family: var(--main); font-weight: 400; font-size: clamp(12px, 1.4vw, 14px); color: var(--ink-soft); letter-spacing: 0; }
 
-/* ============================================================
-   Speller — two-level row → cell scanning composer
-   ============================================================ */
+
 .speller {
   flex: 1; min-height: 0; overflow: hidden; position: relative; z-index: 1;
   display: flex; flex-direction: column; gap: clamp(8px, 1.4vh, 16px);
@@ -376,7 +347,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .sp-title { font-family: var(--display); font-weight: 400; font-size: clamp(17px, 2vw, 22px); color: var(--ink); }
 .sp-speed { display: inline-flex; align-items: center; gap: 6px; font-family: var(--main); font-size: 12px; font-weight: 700; color: var(--ink-faint); padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); text-transform: capitalize; }
 
-/* composed message */
+
 .sp-screen { flex: 0 0 auto; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .sp-eyebrow { font-family: var(--main); font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-faint); }
 .sp-message {
@@ -389,7 +360,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .sp-cursor { display: inline-block; width: 3px; height: 1.05em; background: var(--clay); margin-left: 4px; vertical-align: -0.12em; animation: spblink 1.05s steps(2, start) infinite; }
 @keyframes spblink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
 
-/* the scanning grid — 6 equal rows fill the remaining height, never scrolls */
+
 .sp-grid { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: clamp(5px, 0.9vh, 11px); }
 .sp-row { flex: 1; min-height: 0; display: flex; align-items: stretch; gap: 8px; padding: 3px 4px; border-radius: 16px; transition: background 0.32s var(--ease), box-shadow 0.32s var(--ease); }
 .sp-row.row-on { background: rgba(187, 87, 51, 0.13); box-shadow: inset 0 0 0 1px rgba(187, 87, 51, 0.14); }
@@ -413,7 +384,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .sp-cell.k-punct .sp-cap { font-size: clamp(17px, 2.4vh, 26px); }
 .sp-cell.k-suggestion { flex: 2 1 0; background: linear-gradient(180deg, #fff8ef, #f3e8d8); border-color: rgba(187, 87, 51, 0.18); }
 .sp-cell.k-suggestion .sp-cap { font-size: clamp(12px, 1.5vw, 16px); }
-/* AI-generated suggestion — a subtle gold mark so it's clear the AI composed it */
+
 .sp-cell.k-suggestion.ai { background: linear-gradient(180deg, #fdf5e6, #f4e7d0); border-color: rgba(196, 146, 46, 0.32); }
 .sp-cell .sp-ico.ai { color: #c0892c; }
 .sp-cell.k-suggestion.ai.on { border-color: var(--clay); }
@@ -421,7 +392,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .sp-cell.k-back { flex: 0 0 auto; min-width: clamp(54px, 7vw, 84px); color: var(--ink-soft); background: rgba(255, 255, 255, 0.45); border-style: dashed; }
 .sp-cell.k-recent { flex: 1 1 0; }
 .sp-cell.k-note { flex: 1 1 0; background: none; border-style: dashed; color: var(--ink-faint); box-shadow: none; }
-/* the prominent "Say it" cell — filled accent so it reads as the primary action */
+
 .sp-cell.k-say { flex: 1.4 1 0; background: linear-gradient(180deg, #cc6c46, var(--clay)); border-color: var(--clay-deep); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 6px 16px -10px rgba(187,87,51,0.7); }
 .sp-cell.k-say .sp-ico { color: #fff; }
 .sp-cell.k-say .sp-cap { font-weight: 700; }
@@ -431,7 +402,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .sp-cell.on { border-color: var(--clay-deep); background: linear-gradient(180deg, #fff7ec, #f3e3cf); transform: translateY(-2px) scale(1.04); box-shadow: 0 0 0 2.5px var(--clay-deep), 0 8px 16px -10px rgba(187, 87, 51, 0.6); color: var(--clay-deep); z-index: 2; }
 .sp-cell.on .sp-ico { color: var(--clay-deep); }
 
-/* urgent (call for help) + armed (clear confirm) */
+
 .sp-cell.urgent { background: linear-gradient(180deg, #f9eae3, #f1d8ce); border-color: rgba(163, 45, 24, 0.32); color: #a32d18; }
 .sp-cell.urgent .sp-ico { color: #a32d18; }
 .sp-cell.urgent.on { border-color: #a32d18; box-shadow: 0 0 0 2px #a32d18, 0 7px 14px -10px rgba(163, 45, 24, 0.6); color: #8f2614; }
@@ -440,7 +411,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 .sp-hint { flex: 0 0 auto; text-align: center; padding: clamp(6px, 1.2vh, 14px) 8px 2px; font-family: var(--main); font-size: 13px; color: var(--ink-faint); display: flex; align-items: center; justify-content: center; gap: 10px; }
 .sp-hint b { color: var(--ink-soft); }
 
-/* resting overlay — calm, paused */
+
 .sp-rest { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; padding: 24px;
   background: rgba(243, 239, 231, 0.86); backdrop-filter: blur(10px); animation: announceIn 0.4s var(--ease); }
 .sp-rest-card { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--ink); max-width: 30ch; }

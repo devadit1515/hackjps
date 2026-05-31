@@ -6,8 +6,6 @@ import { ScanMachine, Editor, buildRows, ROW_LABELS } from "@/lib/speller.mjs";
 import { suggest, geminiSuggest, personalSuggest, recordMessage, dedupeByMeaning } from "@/lib/predict.mjs";
 import { cues } from "@/lib/cues.mjs";
 
-// Merge predictions from several sources in priority order, drop ones that mean
-// the same thing (even if worded differently), and cap at 4.
 function mergeSuggestions(...lists) {
   const all = [];
   for (const list of lists) for (const s of list || []) {
@@ -21,10 +19,9 @@ function LIcon({ name, size = 22, stroke = 1.75 }) {
   return <Cmp size={size} strokeWidth={stroke} aria-hidden />;
 }
 
-const SPEEDS = [1750, 1300, 950]; // slow · normal · fast (ms per scan step)
+const SPEEDS = [1750, 1300, 950];
 const SPEED_LABEL = ["slow", "normal", "fast"];
 
-// Build the temporary single-row grid for the "recent messages" overlay.
 function recentRows(recents) {
   const cells = (recents || []).slice(0, 5).map((t, i) => ({ kind: "recent", label: t, value: t, key: "rc" + i }));
   if (!cells.length) cells.push({ kind: "note", label: "No spoken messages yet", value: "", key: "rc-none" });
@@ -50,32 +47,27 @@ const Speller = forwardRef(function Speller(
   const [resting, setResting] = useState(false);
   const [clearArmed, setClearArmed] = useState(false);
   const [recentOpen, setRecentOpen] = useState(false);
-  const [soundOn, setSoundOn] = useState(false);     // soft per-scan tick (off by default)
-  const speakLetters = false;                         // echo each letter aloud (kept off)
+  const [soundOn, setSoundOn] = useState(false);
+  const speakLetters = false;
 
   const abortRef = useRef(null);
 
-  /* ---------- predictions: on-device instantly, Gemini upgrades when reachable ---------- */
   const refreshSuggestions = useCallback((t) => {
-    // instant, offline: what this person tends to say + the on-device model
     const personal = personalSuggest(t, 2);
     const base = suggest(t, 4);
     setSuggestions(mergeSuggestions(personal, base));
     if (abortRef.current) abortRef.current.abort();
     if (!t.trim()) return;
-    // generative upgrade: AI turns sparse input into full sentences (when a key is set)
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     const id = setTimeout(async () => {
       const g = await geminiSuggest(t, { signal: ctrl.signal });
       if (!g || ctrl.signal.aborted) return;
-      // AI first (the showcase), then learned + on-device — dedupe removes overlap
       setSuggestions(mergeSuggestions(g, personal, base));
     }, 280);
     ctrl.signal.addEventListener("abort", () => clearTimeout(id));
   }, []);
 
-  /* ---------- grid ---------- */
   const rows = useMemo(
     () => (recentOpen ? recentRows(recents) : buildRows(suggestions, text.trim().length > 0)),
     [recentOpen, recents, suggestions, text]
@@ -87,7 +79,6 @@ const Speller = forwardRef(function Speller(
     bump();
   }, [rows, recentOpen, bump]);
 
-  /* ---------- auto-scan (frozen while eyes closed, resting, or inactive) ---------- */
   const scanMs = SPEEDS[speedIdx];
   useEffect(() => {
     if (!active || eyesClosed || resting) return;
@@ -99,24 +90,21 @@ const Speller = forwardRef(function Speller(
     return () => clearInterval(id);
   }, [active, eyesClosed, resting, scanMs, soundOn, rows, bump]);
 
-  // auto-disarm a pending "clear" after a few seconds
   useEffect(() => {
     if (!clearArmed) return;
     const id = setTimeout(() => setClearArmed(false), 7000);
     return () => clearTimeout(id);
   }, [clearArmed]);
 
-  /* ---------- speaking ---------- */
   const doSpeakText = useCallback((t) => {
     const s = (t || "").trim();
     if (!s) return;
     onSpoke?.(s);
-    recordMessage(s); // the model learns what this person actually says
+    recordMessage(s);
     startAnnounce(s, { returnTo: "spell" });
   }, [onSpoke, startAnnounce]);
 
   const doSpeak = useCallback(() => doSpeakText(editorRef.current.text), [doSpeakText]);
-  // The prominent "Say it" cell: announce, then return to Home when dismissed.
   const doSpeakHome = useCallback(() => {
     const t = editorRef.current.text.trim();
     if (!t) return;
@@ -129,12 +117,11 @@ const Speller = forwardRef(function Speller(
     startAnnounce("I need help. Please come quickly.", { urgent: true, returnTo: "spell" });
   }, [startAnnounce]);
 
-  /* ---------- apply a chosen cell ---------- */
   const applyCell = useCallback((item) => {
     if (!item) return;
     const ed = editorRef.current;
     const isClear = item.kind === "edit" && item.value === "clear";
-    if (!isClear && clearArmed) setClearArmed(false); // any other choice cancels a pending clear
+    if (!isClear && clearArmed) setClearArmed(false);
 
     switch (item.kind) {
       case "letter": ed.addLetter(item.value); if (speakLetters) say(item.value); break;
@@ -167,10 +154,9 @@ const Speller = forwardRef(function Speller(
     refreshSuggestions(t);
   }, [clearArmed, speakLetters, say, doSpeak, doSpeakHome, doCall, doSpeakText, refreshSuggestions]);
 
-  /* ---------- selection (long blink / Space / click) ---------- */
   const handleSelect = useCallback(() => {
     if (!active) return;
-    if (resting) { setResting(false); return; } // BlinkCam already chimes on the blink
+    if (resting) { setResting(false); return; }
     const ev = machineRef.current.select();
     if (ev.type === "back") { if (recentOpen) setRecentOpen(false); else bump(); return; }
     if (ev.type === "enterRow") { bump(); return; }
@@ -178,12 +164,10 @@ const Speller = forwardRef(function Speller(
     bump();
   }, [active, resting, recentOpen, applyCell, bump]);
 
-  // expose long-blink to the parent without re-subscribing the camera
   const selectRef = useRef(handleSelect);
   useEffect(() => { selectRef.current = handleSelect; }, [handleSelect]);
   useImperativeHandle(ref, () => ({ longBlink: () => selectRef.current() }), []);
 
-  // mouse: hovering moves the highlight, clicking selects directly
   const moveTo = useCallback((r, c) => {
     const m = machineRef.current;
     m.mode = "cell"; m.row = r; m.cell = c; bump();
@@ -196,7 +180,6 @@ const Speller = forwardRef(function Speller(
     m.mode = "row"; m.cell = 0; m.row = 0; bump();
   }, [applyCell, recentOpen, bump]);
 
-  /* ---------- keyboard fallback ---------- */
   useEffect(() => {
     if (!active) return;
     const onKey = (e) => {
@@ -224,7 +207,6 @@ const Speller = forwardRef(function Speller(
     return () => window.removeEventListener("keydown", onKey);
   }, [active, recentOpen, onExit, bump, refreshSuggestions]);
 
-  /* ---------- render ---------- */
   const m = machineRef.current.state();
   const renderCell = (cell, r, c) => {
     const focused = m.mode === "cell" && r === m.row && c === m.cell;

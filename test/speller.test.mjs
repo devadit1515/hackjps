@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildRows, ROW_LABELS, ScanMachine, Editor } from "../lib/speller.mjs";
 
-/* ---------------- layout ---------------- */
 test("layout: six rows, every row ends with a back cell", () => {
   const rows = buildRows([{ label: "water", text: "Water " }]);
   assert.equal(rows.length, 6);
@@ -30,14 +29,13 @@ test("layout: letters are alphabetical and stationary", () => {
   assert.equal(all, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 });
 
-/* ---------------- scan machine ---------------- */
 test("machine: row tick wraps; select enters cell mode", () => {
   const rows = buildRows([]);
   const m = new ScanMachine(rows);
   assert.equal(m.state().mode, "row");
   m.tick(); assert.equal(m.state().row, 1);
   for (let i = 0; i < rows.length; i++) m.tick();
-  assert.equal(m.state().row, 1); // wrapped fully around + 1
+  assert.equal(m.state().row, 1);
   m.reset();
   const ev = m.select();
   assert.equal(ev.type, "enterRow");
@@ -47,24 +45,24 @@ test("machine: row tick wraps; select enters cell mode", () => {
 test("machine: selecting a real cell returns it and resets to top row", () => {
   const rows = buildRows([]);
   const m = new ScanMachine(rows);
-  m.select();          // enter row 0 (suggestions) -> cell mode
+  m.select();
   m.toRows();
-  // walk to the letters row (row 1) and enter it
-  m.tick();            // row 1
-  m.select();          // enter cell mode on row 1
-  const ev = m.select(); // pick first cell (letter A)
+
+  m.tick();
+  m.select();
+  const ev = m.select();
   assert.equal(ev.type, "cell");
   assert.equal(ev.item.value, "A");
   assert.equal(m.state().mode, "row");
-  assert.equal(m.state().row, 0); // restarted at predictions
+  assert.equal(m.state().row, 0);
 });
 
 test("machine: back cell escapes a wrong row without choosing", () => {
   const rows = buildRows([]);
   const m = new ScanMachine(rows);
-  m.tick();            // row 1 (A–I)
-  m.select();          // enter it
-  // walk to the back cell (last) and select it
+  m.tick();
+  m.select();
+
   const len = rows[1].length;
   for (let i = 0; i < len - 1; i++) m.tick();
   const ev = m.select();
@@ -72,7 +70,6 @@ test("machine: back cell escapes a wrong row without choosing", () => {
   assert.equal(m.state().mode, "row");
 });
 
-/* ---------------- editor ---------------- */
 test("editor: auto-caps sentence starts, lowercase mid-sentence", () => {
   const e = new Editor();
   e.addLetter("h"); assert.equal(e.text, "H");
@@ -109,7 +106,7 @@ test("editor: undo reverses the last change; clear empties", () => {
   assert.equal(e.text, "Ab");
   e.undo(); assert.equal(e.text, "A");
   e.clear(); assert.equal(e.text, "");
-  e.undo(); assert.equal(e.text, "A"); // clear was snapshotted
+  e.undo(); assert.equal(e.text, "A");
 });
 
 test("editor: setText (accepting a suggestion) is undoable", () => {

@@ -48,3 +48,7 @@ next-env.d.ts
 .vercel
 
 .vercel
+
+# personal notes - kept local, not committed
+/VIDEO-SCRIPT.md
+/SUBMISSION-GUIDE.md

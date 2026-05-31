@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { suggest, learn, personalFrom, sameMeaning, dedupeByMeaning } from "../lib/predict.mjs";
 
-/* ---------------- on-device predictor ---------------- */
 test("predict: empty message offers openers", () => {
   const s = suggest("");
   assert.ok(s.length > 0);
@@ -48,7 +47,6 @@ test("predict: no two suggestions mean the same thing (medicine vs medication)",
   assert.equal(meds.length, 1);
 });
 
-/* ---------------- personalization ---------------- */
 const empty = { words: {}, phrases: [] };
 
 test("personal: learns a spoken message and suggests it back from its start", () => {
@@ -76,7 +74,6 @@ test("personal: empty model returns nothing", () => {
   assert.equal(personalFrom(empty, "I need").length, 0);
 });
 
-/* ---------------- dedupe by meaning ---------------- */
 test("dedupe: paraphrases of one intent are treated as the same", () => {
   assert.equal(sameMeaning("I would like cold water.", "Could you get me some cold water, please?"), true);
   assert.equal(sameMeaning("I need help now.", "Please help me."), true);
@@ -95,7 +92,7 @@ test("dedupe: collapses a list of cold-water rewordings to one, keeps distinct o
     "Could I have a blanket?",
     "I need to warm up.",
   ]);
-  assert.equal(out.length, 3); // one cold-water + blanket + warm up
+  assert.equal(out.length, 3);
   assert.ok(out.includes("Could I have a blanket?"));
 });
 

@@ -14,7 +14,6 @@ function LIcon({ name, size = 30, stroke = 1.5 }) {
   return <Cmp size={size} strokeWidth={stroke} aria-hidden />;
 }
 
-// How long the highlight rests on each choice before walking to the next one.
 const SCAN_MS = 1450;
 
 export default function Aloud() {
@@ -23,14 +22,14 @@ export default function Aloud() {
   const [camOn, setCamOn] = useState(false);
   const [toast, setToast] = useState("");
 
-  const [view, setView] = useState("home"); // home | feel | need | people | answer | spell
+  const [view, setView] = useState("home");
   const [focusIdx, setFocusIdx] = useState(null);
   const [hovering, setHovering] = useState(false);
   const [dwellLocked, setDwellLocked] = useState(false);
-  const [eyesClosed, setEyesClosed] = useState(false); // freeze the scan while a blink is in progress
-  const [recents, setRecents] = useState([]);          // last spoken messages, re-sayable from the speller
-  const [calibrating, setCalibrating] = useState(false); // blink-calibration overlay is up
-  const [recalNonce, setRecalNonce] = useState(0);       // bump to re-run calibration
+  const [eyesClosed, setEyesClosed] = useState(false);
+  const [recents, setRecents] = useState([]);
+  const [calibrating, setCalibrating] = useState(false);
+  const [recalNonce, setRecalNonce] = useState(0);
 
   const speech = useSpeech();
   const spellRef = useRef(null);
@@ -46,7 +45,6 @@ export default function Aloud() {
     if (rt !== "spell") setFocusIdx(null);
   }, [speech]);
 
-  /* ---------- targets (boards) ---------- */
   const { primary, secondary, targets } = useMemo(() => {
     const primary = [], secondary = [];
     if (view === "home") {
@@ -63,7 +61,6 @@ export default function Aloud() {
 
   useEffect(() => { setFocusIdx(started ? 0 : null); }, [view, started]);
 
-  /* ---------- auto-scan for the boards (not the speller, which scans itself) ---------- */
   useEffect(() => {
     if (!started || view === "spell" || speech.announce || showHelp || hovering || eyesClosed || calibrating) return;
     const n = targets.length;
@@ -74,7 +71,6 @@ export default function Aloud() {
     return () => clearInterval(id);
   }, [started, view, speech.announce, showHelp, hovering, eyesClosed, calibrating, targets.length]);
 
-  /* ---------- board selection ---------- */
   const select = useCallback((item) => {
     if (!item) return;
     setFocusIdx(null);
@@ -106,7 +102,6 @@ export default function Aloud() {
     });
   }, [targets.length, cols]);
 
-  /* ---------- keyboard (boards only; the speller owns its own) ---------- */
   useEffect(() => {
     if (!started) return;
     function onKey(e) {
@@ -115,7 +110,7 @@ export default function Aloud() {
         if (["Space", "Enter", "Escape"].includes(e.code)) { e.preventDefault(); dismissAnnounce(); }
         return;
       }
-      if (view === "spell") return; // Speller handles keyboard while spelling
+      if (view === "spell") return;
       if (e.code === "ArrowRight") { e.preventDefault(); moveFocus("right"); }
       else if (e.code === "ArrowLeft") { e.preventDefault(); moveFocus("left"); }
       else if (e.code === "ArrowDown") { e.preventDefault(); moveFocus("down"); }
@@ -126,7 +121,6 @@ export default function Aloud() {
     return () => window.removeEventListener("keydown", onKey);
   }, [started, showHelp, speech.announce, view, moveFocus, selectFocused, dismissAnnounce]);
 
-  /* ---------- the single eye switch: a deliberate long blink ---------- */
   const longBlinkRef = useRef(() => {});
   useEffect(() => {
     longBlinkRef.current = () => {
@@ -139,13 +133,12 @@ export default function Aloud() {
 
   function flashToast(m) { setToast(m); setTimeout(() => setToast(""), 4000); }
 
-  /* ============================================================ */
   if (!started) {
     return (
       <Intro
         onBegin={() => {
           setStarted(true);
-          setCamOn(true); // eye control is the only mode — request the camera immediately
+          setCamOn(true);
           speech.primeSpeech();
         }}
       />
@@ -168,8 +161,6 @@ export default function Aloud() {
       extraClass || "",
     ].join(" ");
 
-    // data-cat gives each board its own accent: the home tiles by id, the spell
-    // tile its plum, and word tiles inherit the colour of the board they sit in.
     const catKey =
       item.id ||
       (item.type === "spell" ? "spell" : (view !== "home" && item.type === "say" ? view : undefined));
@@ -255,7 +246,7 @@ export default function Aloud() {
   );
 }
 
-/* ============================================================ */
+
 function Announce({ data, speaking, onDone }) {
   const [dwell, setDwell] = useState(false);
   return (
