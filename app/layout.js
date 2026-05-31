@@ -2,9 +2,6 @@ import { Atkinson_Hyperlegible, Fraunces } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
-// Atkinson Hyperlegible was designed by the Braille Institute specifically to
-// improve legibility for low-vision readers — accessibility where it matters
-// most (every control and word in the Sanctuary). This is a feature, not a default.
 const atkinson = Atkinson_Hyperlegible({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -13,9 +10,6 @@ const atkinson = Atkinson_Hyperlegible({
   display: "swap",
 });
 
-// Fraunces — a soft, optical "couture" serif — for the brand and the emotional
-// register of the Threshold. The expressive display voice; Atkinson stays
-// for everything interactive.
 const fraunces = Fraunces({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
@@ -31,7 +25,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#17130e",
+  themeColor: "#FBF7F1",
   width: "device-width",
   initialScale: 1,
 };
