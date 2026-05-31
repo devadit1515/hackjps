@@ -25,8 +25,9 @@ export async function POST(request) {
         `This may be terse or keyword-style (e.g. "cold water" → "Could I please have ` +
         `some cold water?"). Reply with up to 4 short, COMPLETE, natural first-person ` +
         `sentences they most likely want to SAY out loud — turning sparse input into ` +
-        `fluent speech, not merely predicting the next word. Prioritise everyday care ` +
-        `and communication needs, and keep each distinct and brief.`,
+        `fluent speech, not merely predicting the next word. Each suggestion must express ` +
+        `a genuinely DIFFERENT need or idea — never two rewordings of the same thing. ` +
+        `Prioritise everyday care and communication needs, and keep each distinct and brief.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: { type: Type.ARRAY, items: { type: Type.STRING } },

@@ -8,20 +8,17 @@ import { buildRows, ROW_LABELS } from "@/lib/speller/layout.mjs";
 import { suggest } from "@/lib/predict/ondevice.mjs";
 import { geminiSuggest } from "@/lib/predict/gemini.mjs";
 import { personalSuggest, recordMessage } from "@/lib/predict/personal.mjs";
+import { dedupeByMeaning } from "@/lib/predict/dedupe.mjs";
 import { cues } from "@/lib/audio/cues.mjs";
 
-// Merge predictions from several sources, de-duplicated, capped at 4.
+// Merge predictions from several sources in priority order, drop ones that mean
+// the same thing (even if worded differently), and cap at 4.
 function mergeSuggestions(...lists) {
-  const out = [], seen = new Set();
-  for (const list of lists) {
-    for (const s of list || []) {
-      const k = (s.text || "").trim().toLowerCase();
-      if (!s.label || !k || seen.has(k)) continue;
-      seen.add(k); out.push(s);
-      if (out.length >= 4) return out;
-    }
+  const all = [];
+  for (const list of lists) for (const s of list || []) {
+    if (s && s.label && (s.text || "").trim()) all.push(s);
   }
-  return out;
+  return dedupeByMeaning(all).slice(0, 4);
 }
 
 function LIcon({ name, size = 22, stroke = 1.75 }) {
@@ -77,8 +74,8 @@ const Speller = forwardRef(function Speller(
     const id = setTimeout(async () => {
       const g = await geminiSuggest(t, { signal: ctrl.signal });
       if (!g || ctrl.signal.aborted) return;
-      // AI first (the showcase), then a learned phrase, then the on-device fill
-      setSuggestions(mergeSuggestions(g.slice(0, 2), personal.slice(0, 1), base, g.slice(2)));
+      // AI first (the showcase), then learned + on-device — dedupe removes overlap
+      setSuggestions(mergeSuggestions(g, personal, base));
     }, 280);
     ctrl.signal.addEventListener("abort", () => clearTimeout(id));
   }, []);
