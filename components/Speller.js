@@ -141,6 +141,7 @@ const Speller = forwardRef(function Speller(
         }
         break;
       case "action":
+        if (item.value === "home") { onExit?.(); return; }
         if (item.value === "speak") { doSpeak(); return; }
         if (item.value === "rest") { setResting(true); return; }
         if (item.value === "recent") { setRecentOpen(true); return; }
@@ -152,7 +153,7 @@ const Speller = forwardRef(function Speller(
     const t = ed.text;
     setText(t);
     refreshSuggestions(t);
-  }, [clearArmed, speakLetters, say, doSpeak, doSpeakHome, doCall, doSpeakText, refreshSuggestions]);
+  }, [clearArmed, speakLetters, say, doSpeak, doSpeakHome, doCall, doSpeakText, refreshSuggestions, onExit]);
 
   const handleSelect = useCallback(() => {
     if (!active) return;
