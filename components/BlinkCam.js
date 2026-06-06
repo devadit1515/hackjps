@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { icons } from "lucide-react";
 import { cues } from "@/lib/cues.mjs";
-import { computeThresholds, loadThresholds, saveThresholds, DEFAULTS } from "@/lib/blink.mjs";
+import { computeThresholds, saveThresholds, DEFAULTS } from "@/lib/blink.mjs";
 
 function LIcon({ name, size = 26, stroke = 1.6 }) {
   const Cmp = icons[name] || icons.Circle;
@@ -14,11 +14,11 @@ const WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm"
 const MODEL =
   "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
 
-const HOLD_MS = 500;
-const REFIRE_MS = 550;
+const HOLD_MS = 600;
+const REFIRE_MS = 700;
 const DETECT_MS = 62;
 
-export default function BlinkCam({ onLongBlink, onEyesClosed, onError, onCalibrating, recalNonce = 0, say }) {
+export default function BlinkCam({ onLongBlink, onEyesClosed, onError, onCalibrating, onReady, recalNonce = 0, say }) {
   const videoRef = useRef(null);
   const [armed, setArmed] = useState(false);
   const [meter, setMeter] = useState(0);
@@ -34,8 +34,8 @@ export default function BlinkCam({ onLongBlink, onEyesClosed, onError, onCalibra
   const closedS = useRef([]);
   const timers = useRef([]);
 
-  const cb = useRef({ onLongBlink, onEyesClosed, onError, onCalibrating, say });
-  cb.current = { onLongBlink, onEyesClosed, onError, onCalibrating, say };
+  const cb = useRef({ onLongBlink, onEyesClosed, onError, onCalibrating, onReady, say });
+  cb.current = { onLongBlink, onEyesClosed, onError, onCalibrating, onReady, say };
 
   const setPhase = (p) => { phaseRef.current = p; setPhaseState(p); };
   const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
@@ -53,8 +53,8 @@ export default function BlinkCam({ onLongBlink, onEyesClosed, onError, onCalibra
     saveThresholds(t);
     try { cues.select(); } catch {}
     setPhase("done");
-    speak("All set.");
-    timers.current.push(setTimeout(() => { setPhase("detect"); cb.current.onCalibrating?.(false); }, 1100));
+    speak("All set. Open your eyes.");
+    timers.current.push(setTimeout(() => { setPhase("detect"); cb.current.onCalibrating?.(false); }, 1600));
   };
 
   const startCalibration = () => {
@@ -62,21 +62,19 @@ export default function BlinkCam({ onLongBlink, onEyesClosed, onError, onCalibra
     openS.current = []; closedS.current = []; sampleRef.current = null;
     cb.current.onCalibrating?.(true);
     setPhase("open");
-    speak("Keep your eyes open, and look at the screen.");
+    speak("First, keep your eyes open and look at the screen.");
     timers.current.push(setTimeout(() => { sampleRef.current = "open"; }, 700));
     timers.current.push(setTimeout(() => {
-      sampleRef.current = null; setPhase("closed");
-      speak("Now gently close your eyes, and hold them shut.");
-    }, 2900));
-    timers.current.push(setTimeout(() => { sampleRef.current = "closed"; }, 3900));
-    timers.current.push(setTimeout(finishCalibration, 6100));
-  };
-
-  const skipCalibration = () => {
-    clearTimers(); sampleRef.current = null;
-    closeRef.current = DEFAULTS.close; openRef.current = DEFAULTS.open;
-    saveThresholds(DEFAULTS);
-    setPhase("detect"); cb.current.onCalibrating?.(false);
+      sampleRef.current = null; setPhase("ready");
+      speak("Now get ready. When you hear the beep, close your eyes and hold them shut.");
+    }, 2700));
+    timers.current.push(setTimeout(() => {
+      setPhase("closed");
+      try { cues.add(); } catch {}
+      speak("Close your eyes now.");
+    }, 5000));
+    timers.current.push(setTimeout(() => { sampleRef.current = "closed"; }, 5700));
+    timers.current.push(setTimeout(finishCalibration, 7700));
   };
 
   useEffect(() => {
@@ -86,23 +84,30 @@ export default function BlinkCam({ onLongBlink, onEyesClosed, onError, onCalibra
 
     async function init() {
       try {
-        const { FilesetResolver, FaceLandmarker } = await import("@mediapipe/tasks-vision");
-        const fileset = await FilesetResolver.forVisionTasks(WASM);
-        landmarker = await FaceLandmarker.createFromOptions(fileset, {
-          baseOptions: { modelAssetPath: MODEL, delegate: "GPU" },
-          outputFaceBlendshapes: true, runningMode: "VIDEO", numFaces: 1,
-        });
-        stream = await navigator.mediaDevices.getUserMedia({
+        const streamP = navigator.mediaDevices.getUserMedia({
           video: { facingMode: "user", width: 480, height: 360 }, audio: false,
         });
-        if (cancelled) return;
+        const modelP = (async () => {
+          const { FilesetResolver, FaceLandmarker } = await import("@mediapipe/tasks-vision");
+          const fileset = await FilesetResolver.forVisionTasks(WASM);
+          return FaceLandmarker.createFromOptions(fileset, {
+            baseOptions: { modelAssetPath: MODEL, delegate: "GPU" },
+            outputFaceBlendshapes: true, runningMode: "VIDEO", numFaces: 1,
+          });
+        })();
+
+        stream = await streamP;
+        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
         const video = videoRef.current;
         video.srcObject = stream;
         await video.play();
+
+        landmarker = await modelP;
+        if (cancelled) return;
         setArmed(true);
-        const stored = loadThresholds();
-        if (stored) { closeRef.current = stored.close; openRef.current = stored.open; }
-        else { cb.current.onCalibrating?.(true); setPhase("intro"); }
+        cb.current.onReady?.();
+        cb.current.onCalibrating?.(true);
+        setPhase("intro");
         loop();
       } catch (e) {
         console.error("[BlinkCam]", e);
@@ -185,26 +190,27 @@ export default function BlinkCam({ onLongBlink, onEyesClosed, onError, onCalibra
               <>
                 <span className="calib-ico"><LIcon name="ScanFace" size={34} /></span>
                 <h2>Set up eye control</h2>
-                <p>A quick check tunes blinking to your eyes and lighting — about six seconds. A helper can start it for you.</p>
+                <p>A quick check tunes blinking to your eyes and lighting. Tap Start and follow along — it takes about ten seconds.</p>
                 <div className="calib-actions">
                   <button className="calib-go" onClick={startCalibration}>Start</button>
-                  <button className="calib-skip" onClick={skipCalibration}>Skip for now</button>
                 </div>
               </>
             )}
-            {(phase === "open" || phase === "closed") && (
+            {(phase === "open" || phase === "ready" || phase === "closed") && (
               <>
-                <span className={`calib-eye ${phase}`}><LIcon name={phase === "open" ? "Eye" : "EyeOff"} size={40} /></span>
-                <h2>{phase === "open" ? "Keep your eyes open" : "Now close your eyes"}</h2>
-                <p>{phase === "open" ? "Look at the screen, relaxed." : "Gently shut them and hold until you hear the tone."}</p>
-                <div className="calib-bar" key={phase}><i style={{ animationDuration: phase === "open" ? "2.9s" : "3.2s" }} /></div>
+                <span className={`calib-eye ${phase}`}><LIcon name={phase === "closed" ? "EyeOff" : "Eye"} size={40} /></span>
+                <h2>{phase === "open" ? "Keep your eyes open" : phase === "ready" ? "Get ready…" : "Close your eyes now"}</h2>
+                <p>{phase === "open" ? "Look at the screen, relaxed."
+                  : phase === "ready" ? "When you hear the beep, close your eyes and hold them shut."
+                  : "Hold them shut until you hear the next tone."}</p>
+                <div className="calib-bar" key={phase}><i style={{ animationDuration: phase === "ready" ? "2.3s" : "2.7s" }} /></div>
               </>
             )}
             {phase === "done" && (
               <>
                 <span className="calib-ico done"><LIcon name="Check" size={34} stroke={2.4} /></span>
                 <h2>All set</h2>
-                <p>Eye control is tuned to you. You can redo this anytime from Help.</p>
+                <p>Eye control is tuned to you. Take a long blink to choose.</p>
               </>
             )}
           </div>

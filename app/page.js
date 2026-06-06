@@ -20,6 +20,7 @@ export default function Aloud() {
   const [started, setStarted] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [camOn, setCamOn] = useState(false);
+  const [camReady, setCamReady] = useState(false);
   const [toast, setToast] = useState("");
 
   const [view, setView] = useState("home");
@@ -62,14 +63,14 @@ export default function Aloud() {
   useEffect(() => { setFocusIdx(started ? 0 : null); }, [view, started]);
 
   useEffect(() => {
-    if (!started || view === "spell" || speech.announce || showHelp || hovering || eyesClosed || calibrating) return;
+    if (!started || view === "spell" || speech.announce || showHelp || hovering || eyesClosed || calibrating || (camOn && !camReady)) return;
     const n = targets.length;
     if (!n) return;
     const id = setInterval(() => {
       setFocusIdx((i) => (i == null ? 0 : (i + 1) % n));
     }, SCAN_MS);
     return () => clearInterval(id);
-  }, [started, view, speech.announce, showHelp, hovering, eyesClosed, calibrating, targets.length]);
+  }, [started, view, speech.announce, showHelp, hovering, eyesClosed, calibrating, camOn, camReady, targets.length]);
 
   const select = useCallback((item) => {
     if (!item) return;
@@ -111,6 +112,7 @@ export default function Aloud() {
         return;
       }
       if (view === "spell") return;
+      if (camOn && !camReady) return;
       if (e.code === "ArrowRight") { e.preventDefault(); moveFocus("right"); }
       else if (e.code === "ArrowLeft") { e.preventDefault(); moveFocus("left"); }
       else if (e.code === "ArrowDown") { e.preventDefault(); moveFocus("down"); }
@@ -119,7 +121,7 @@ export default function Aloud() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [started, showHelp, speech.announce, view, moveFocus, selectFocused, dismissAnnounce]);
+  }, [started, showHelp, speech.announce, view, camOn, camReady, moveFocus, selectFocused, dismissAnnounce]);
 
   const longBlinkRef = useRef(() => {});
   useEffect(() => {
@@ -144,6 +146,8 @@ export default function Aloud() {
       />
     );
   }
+
+  const camLoading = camOn && !camReady;
 
   const renderChoice = (item, extraClass) => {
     const idx = targets.indexOf(item);
@@ -170,15 +174,15 @@ export default function Aloud() {
         key={item.key}
         className={cls}
         data-cat={catKey}
-        onMouseEnter={() => { setFocusIdx(idx); setHovering(true); }}
+        onMouseEnter={() => { if (camLoading) return; setFocusIdx(idx); setHovering(true); }}
         onMouseLeave={() => { setHovering(false); setDwellLocked(false); }}
-        onClick={() => select(item)}
+        onClick={() => { if (camLoading) return; select(item); }}
         aria-label={item.label}
       >
         <span className="c-ico"><LIcon name={item.icon} size={item.type === "cat" ? 30 : 26} /></span>
         <span className="c-label">{item.label}</span>
         {item.sub && <span className="c-sub">{item.sub}</span>}
-        <span className="dwell-bar" onAnimationEnd={() => { if (isDwell) select(item); }} />
+        <span className="dwell-bar" onAnimationEnd={() => { if (isDwell && !camLoading) select(item); }} />
       </button>
     );
   };
@@ -223,7 +227,7 @@ export default function Aloud() {
           </main>
 
           <footer className="hint">
-            {camOn ? <><span className="live" /> The highlight moves on its own · long-blink to choose</> : <>Hover to dwell, or use <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> then <kbd>Space</kbd></>}
+            {camOn ? <><span className="live" /> The highlight moves on its own · take a long blink to select</> : <>Hover to dwell, or use <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> then <kbd>Space</kbd></>}
           </footer>
         </>
       )}
@@ -233,10 +237,21 @@ export default function Aloud() {
           onLongBlink={() => longBlinkRef.current()}
           onEyesClosed={(c) => setEyesClosed(c)}
           onCalibrating={(c) => setCalibrating(c)}
+          onReady={() => setCamReady(true)}
           recalNonce={recalNonce}
           say={speech.say}
-          onError={(m) => { flashToast(m); setCamOn(false); }}
+          onError={(m) => { flashToast(m); setCamOn(false); setCamReady(false); }}
         />
+      )}
+
+      {camLoading && (
+        <div className="calib" role="dialog" aria-label="Starting camera">
+          <div className="calib-card">
+            <span className="calib-ico"><LIcon name="Camera" size={34} /></span>
+            <h2>Starting camera…</h2>
+            <p>One moment — getting eye control ready. Allow the camera if your browser asks.</p>
+          </div>
+        </div>
       )}
 
       {speech.announce && <Announce data={speech.announce} speaking={speech.speaking} onDone={dismissAnnounce} />}
@@ -245,7 +260,6 @@ export default function Aloud() {
     </div>
   );
 }
-
 
 function Announce({ data, speaking, onDone }) {
   const [dwell, setDwell] = useState(false);
@@ -262,7 +276,7 @@ function Announce({ data, speaking, onDone }) {
         <LIcon name="Check" size={22} stroke={2.2} /> I got help
         {dwell && <span className="dwell-bar" onAnimationEnd={onDone} />}
       </button>
-      <span className="a-hint">When you&apos;re okay again, just hold your eyes shut for a moment — or look at <b>I got help</b> and long-blink.</span>
+      <span className="a-hint">This will keep playing until you long-blink again — or choose <b>I got help</b>.</span>
     </div>
   );
 }
