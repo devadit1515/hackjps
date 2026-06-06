@@ -1,14 +1,16 @@
 # Aloud
 
-A way to talk for people who can only move their eyes — like someone with ALS, locked-in syndrome, cerebral palsy, or paralysis.
+A communication tool for people who can only move their eyes — ALS, locked-in syndrome, cerebral palsy, paralysis.
 
 Live: https://aloud-pink.vercel.app
 
-Someone turns the camera on once. After that, a highlight moves across the choices on its own, and when it lands on what you want, you hold your eyes shut for about a second to pick it. Aloud builds the sentence and says it out loud.
+A caregiver turns the camera on once. After that, a highlight moves across the screen by itself. When it lands on what the person wants, they hold their eyes shut for about a second — that's a selection. Aloud builds the sentence and reads it aloud.
 
-There are two ways to talk. You can step through ready-made phrases — things like "I'm in pain" or "I love you" — or spell something out letter by letter. When you spell, you barely have to type it all: the AI takes a few letters and fills in the whole sentence.
+There are two ways to say something. Quick phrases handle the things that come up most: pain levels, basic needs, emotional things like "I love you" or "hold my hand." For anything else, there's a letter-by-letter spelling mode — but you rarely have to finish the word. The AI watches what you're spelling and offers to complete it, so a few letters usually gets you a full sentence.
 
-Everything runs in the browser. The camera feed never leaves the device, and it works offline — the AI suggestions need a key, but the boards, spelling, and voice all work without one.
+The scanning speed, blink thresholds, and phrase categories were all tuned around one constraint: the person using it is tired. Cognitive load is real. Too many choices and the whole thing becomes exhausting. The goal was something a caregiver could hand off after a two-minute explanation and never have to touch again.
+
+The face detection runs on-device through MediaPipe. Nothing from the camera touches a server. The boards, spelling, and voice all work offline — only the AI suggestions call out, and those need a Gemini API key set in `.env.local`.
 
 ## Run it
 
@@ -17,8 +19,8 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 and allow the camera. To try it without a camera, use the arrow keys to move the highlight and space to select.
+Allow the camera at http://localhost:3000. No camera? Arrow keys move the highlight, space selects.
 
 ## Built with
 
-Next.js and React, MediaPipe for reading the blinks, Google Gemini for the sentence suggestions, and the browser's Web Speech API for the voice.
+Next.js, React, MediaPipe FaceLandmarker (blink detection), Google Gemini (sentence suggestions), Web Speech API (voice output).

@@ -283,7 +283,6 @@ function Intro({ onBegin }) {
           Begin with eye control
           {dwell && <span className="dwell-bar" onAnimationEnd={onBegin} />}
         </button>
-        <span className="i-hint">A helper taps once to turn on the camera. After that the highlight moves through the choices on its own — when it lands on what you want, <b>hold your eyes shut for a moment</b> to choose.</span>
       </div>
       <KeyStart onBegin={onBegin} />
     </div>
